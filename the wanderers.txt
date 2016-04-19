@@ -1,0 +1,15 @@
+STRATEGY
+if you don't know how to do something (ie vectors/aiming) make a small game out of it
+PRGOGRAMMING GOALS
+
+DESIGN GOALS
+
+IDEAS
+you are a single character, who you directly control. teammates/other characters are not in your control. they act on AI
+characters can fall in love, if they are together long enough
+characters can express interest in having sex:
+	*harry has expressed interest in having sex. do you reciprocate?*
+	*YES/NO
+	Result either:
+		*You have sex*
+		**
