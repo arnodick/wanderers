@@ -21,7 +21,7 @@ function love.load()
 	Cursor.selection = 2
 
 	Actors={}
-	makeactor(1,50,20,20,0,2)
+	makeactor(1,50,20,20,0,1)
 end
 
 function spritesheet_i(spr, tw, th)
@@ -103,41 +103,38 @@ function makeactor(t,s,x,y,d,v)
 	a.v=v
 	a.tar={0,0}
 	a.vec={0,0}
+	a.moving=false
 	table.insert(Actors,a)
 	return a
 end
 
 function controlactor(a)
 	love.keyboard.setKeyRepeat(true)
---[[
-	if love.keyboard.isDown('right') then
-		a.v=1
-	else
-		a.v=0
-	end
---]]
-	--a.x=a.x+a.v
 	function love.mousepressed(x, y, button)
 		if button==1 then
-			a.tar[1],a.tar[2] = mousetomapcoords(x,y)
+			a.moving=true
+			a.tar[1],a.tar[2] = maptotilecoords(x,y)
+			a.tar[1]=a.tar[1]*TileW
+			a.tar[2]=a.tar[2]*TileH
 		end
 	end
-	if a.x~=a.tar[1] or a.y~=a.tar[2] then
-	local d = distance(a.x,a.y,a.tar[1],a.tar[2])
-	local vec1, vec2 = vector(a.x,a.y,a.tar[1],a.tar[2])
-	--a.x=a.x + (a.tar[1]-a.x)
-	--a.y=a.y + (a.tar[2]-a.y)
-	--a.x=a.x + vec1/d
-	--a.y=a.y + vec2/d
-	a.vec[1] = (vec1/d)
-	a.vec[2] = (vec2/d)
-	a.x=math.floor(a.x + a.vec[1]*2)
-	a.y=math.floor(a.y + a.vec[2]*2)
+	
+	if a.moving then
+		local d = distance(a.x,a.y,a.tar[1],a.tar[2])
+		if d<1 then
+			a.moving=false
+		else
+			local vec1, vec2 = vector(a.x,a.y,a.tar[1],a.tar[2])
+			a.vec[1] = (vec1/d)
+			a.vec[2] = (vec2/d)
+			a.x=a.x + a.vec[1]*a.v
+			a.y=a.y + a.vec[2]*a.v
+		end
 	end
 end
 
 function drawactor(a)
-	love.graphics.draw(Spritesheet,Quads[a.s],(a.x),(a.y))
+	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y))
 end
 
 function drawmap(m)
