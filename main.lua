@@ -2,16 +2,16 @@ function love.load()
 	math.randomseed(os.time())
 	State=1
 
-	spritesheet_i("gfx/sprites.png", 8, 8)
+	spritesheet_load("gfx/sprites.png", 8, 8)
+
 	Scale=4
+	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
+	love.graphics.setLineStyle("rough") --clean SHAPE scaling
 
-	love.graphics.setDefaultFilter("nearest","nearest",0)
-	love.graphics.setLineStyle("rough")
 	love.mouse.setVisible(false)
-
 	Font = love.graphics.newFont("fonts/Kongtext Regular.ttf",10)
 	love.graphics.setFont(Font)
-	Font:setFilter("nearest","nearest",0)
+	Font:setFilter("nearest","nearest",0) --clean TEXT scaling
 
 	MapByteSize=4
 	canvas = love.graphics.newCanvas(320, 240)
@@ -19,13 +19,13 @@ function love.load()
 	Map = loadmap("maps/saved2.txt")
 
 	Cursor = {}
-	Cursor.selection = 2
+	Cursor.selection = 1
 
 	Actors={}
-	makeactor(1,50,20,20,0,1)
+	makeactor(1,50,20,20,0,0.5)
 end
 
-function spritesheet_i(spr, tw, th)
+function spritesheet_load(spr, tw, th)
 	Spritesheet=love.graphics.newImage(spr)
 	local spritesheetW, spritesheetH = Spritesheet:getWidth(), Spritesheet:getHeight()
 	TileW, TileH = tw,th
@@ -40,29 +40,29 @@ end
 
 function loadmap(m)
 	local map = {}
-	for line in love.filesystem.lines(m) do
-		table.insert(map, parse(line))
+	for row in love.filesystem.lines(m) do
+		table.insert(map, textfile_loadbytes(row))
 	end
 	return map
+end
+
+function textfile_loadbytes(l)
+	local ar={}
+	for a=1, #l, MapByteSize*2 do
+		table.insert( ar, tonumber(string.sub(l, a, a+MapByteSize*2-1),16) )
+	end
+	return ar
 end
 
 function savemap(m,n)
 	local str=""
 	for b=1,#m do
 		for a=1,#m[b] do
-			str=str..string.format("%04x",m[b][a])
+			str=str..string.format("%08x",m[b][a])
 		end
 		str=str.."\n"
 	end
 	love.filesystem.write(n, str)
-end
-
-function parse(l)
-	local ar={}
-	for a=1, #l, MapByteSize do
-		table.insert( ar, tonumber(string.sub(l, a, a+MapByteSize-1),16) )
-	end
-	return ar
 end
 
 function clamp(n, mi, ma)
