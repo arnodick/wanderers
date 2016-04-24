@@ -13,9 +13,10 @@ function love.load()
 	love.graphics.setFont(Font)
 	Font:setFilter("nearest","nearest",0)
 
+	MapByteSize=4
 	canvas = love.graphics.newCanvas(320, 240)
-	Map = loadmap("maps/blankmap.txt")
-	--Map = loadmap("maps/saved.txt")
+	--Map = loadmap("maps/blankmap.txt")
+	Map = loadmap("maps/saved2.txt")
 
 	Cursor = {}
 	Cursor.selection = 2
@@ -49,11 +50,7 @@ function savemap(m,n)
 	local str=""
 	for b=1,#m do
 		for a=1,#m[b] do
-			local val=m[b][a]
-			local pad=""
-			if val<16 then pad='0' end
-			local hex=string.format("%x",val)
-			str=str..pad..hex
+			str=str..string.format("%04x",m[b][a])
 		end
 		str=str.."\n"
 	end
@@ -62,8 +59,8 @@ end
 
 function parse(l)
 	local ar={}
-	for a=1, #l, 2 do
-		table.insert( ar, tonumber(string.sub(l, a, a+1),16) )
+	for a=1, #l, MapByteSize do
+		table.insert( ar, tonumber(string.sub(l, a, a+MapByteSize-1),16) )
 	end
 	return ar
 end
@@ -184,7 +181,7 @@ function love.update(dt)
 		love.keyboard.setKeyRepeat(false)
 		if love.keyboard.isDown('s') then
 			--save
-			savemap(Map,"saved.txt")
+			savemap(Map,"saved2.txt")
 		end
 		function love.keypressed(key,scancode,isrepeat )
 			if key=='tab' then
