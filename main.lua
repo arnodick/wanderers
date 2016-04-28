@@ -1,3 +1,5 @@
+movement = require "movement"
+
 function love.load()
 	math.randomseed(os.time())
 	State=1
@@ -71,15 +73,6 @@ function clamp(n, mi, ma)
 	return n
 end
 
-function distance(x,y,x2,y2)
-	local w,h = x2 - x, y2 - y
-	return math.sqrt(w^2+h^2)
-end
-
-function vector(x,y,x2,y2)
-	return x2-x, y2-y
-end
-
 function mousetomapcoords(x,y)
 	return math.floor(x/Scale), math.floor(y/Scale)
 end
@@ -117,11 +110,11 @@ function controlactor(a)
 	end
 	
 	if a.moving then
-		local d = distance(a.x,a.y,a.tar[1],a.tar[2])
+		local d = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
 		if d<1 then
 			a.moving=false
 		else
-			local vec1, vec2 = vector(a.x,a.y,a.tar[1],a.tar[2])
+			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
 			a.vec[1] = (vec1/d)
 			a.vec[2] = (vec2/d)
 			a.x=a.x + a.vec[1]*a.v
