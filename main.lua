@@ -15,8 +15,8 @@ function love.load()
 
 	MapByteSize=4
 	canvas = love.graphics.newCanvas(320, 240)
-	--Map = loadmap("maps/blankmap.txt")
-	Map = loadmap("maps/saved2.txt")
+	--Map = textfile_load("maps/blankmap.txt")
+	Map = textfile_load("maps/saved2.txt")
 
 	Cursor = {}
 	Cursor.selection = 1
@@ -38,7 +38,7 @@ function spritesheet_load(spr, tw, th)
 	end
 end
 
-function loadmap(m)
+function textfile_load(m)
 	local map = {}
 	for row in love.filesystem.lines(m) do
 		table.insert(map, textfile_loadbytes(row))
@@ -54,7 +54,7 @@ function textfile_loadbytes(l)
 	return ar
 end
 
-function savemap(m,n)
+function textfile_save(m,n)
 	local str=""
 	for b=1,#m do
 		for a=1,#m[b] do
@@ -181,7 +181,7 @@ function love.update(dt)
 		love.keyboard.setKeyRepeat(false)
 		if love.keyboard.isDown('s') then
 			--save
-			savemap(Map,"saved2.txt")
+			textfile_save(Map,"saved2.txt")
 		end
 		function love.keypressed(key,scancode,isrepeat )
 			if key=='tab' then
