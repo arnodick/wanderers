@@ -1,3 +1,5 @@
+local bytesize=4
+
 function load(m)
 	local map = {}
 	for row in love.filesystem.lines(m) do
@@ -8,8 +10,8 @@ end
 
 function loadbytes(l)
 	local ar={}
-	for a=1, #l, MapByteSize*2 do
-		table.insert( ar, tonumber(string.sub(l, a, a+MapByteSize*2-1),16) )
+	for a=1, #l, bytesize*2 do
+		table.insert( ar, tonumber(string.sub(l, a, a+bytesize*2-1),16) )
 	end
 	return ar
 end
@@ -18,7 +20,8 @@ function save(m,n)
 	local str=""
 	for b=1,#m do
 		for a=1,#m[b] do
-			str=str..string.format("%08x",m[b][a])
+			--str=str..string.format("%08x",m[b][a])
+			str=str..string.format("%0"..tostring(bytesize*2).."x",m[b][a])
 		end
 		str=str.."\n"
 	end

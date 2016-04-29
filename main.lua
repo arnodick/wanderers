@@ -17,10 +17,9 @@ function love.load()
 	love.graphics.setFont(Font)
 	Font:setFilter("nearest","nearest",0) --clean TEXT scaling
 
-	MapByteSize=4
 	canvas = love.graphics.newCanvas(320, 240)
 	--Map = textfile.load("maps/blankmap.txt")
-	Map = textfile.load("maps/saved2.txt")
+	Map = textfile.load("maps/saved3.txt")
 
 	Cursor = {}
 	Cursor.selection = 1
@@ -62,8 +61,8 @@ function makeactor(t,s,x,y,d,v)
 	a.y=y
 	a.d=d
 	a.v=v
-	a.tar={0,0}
-	a.vec={0,0}
+	a.tar={0,0}--TODO: change this to tar.x
+	a.vec={0,0}--TODO: change this to vec.x
 	a.moving=false
 	table.insert(Actors,a)
 	return a
@@ -123,7 +122,7 @@ function love.update(dt)
 	elseif State==2 then
 		for i,v in ipairs(Actors) do controlactor(v) end
 		love.keyboard.setKeyRepeat(false)
-		function love.keypressed(key,scancode,isrepeat )
+		function love.keypressed(key,scancode,isrepeat)
 			if key=='tab' then
 				State=3
 			end
@@ -145,7 +144,7 @@ function love.update(dt)
 		love.keyboard.setKeyRepeat(false)
 		if love.keyboard.isDown('s') then
 			--save
-			textfile.save(Map,"saved2.txt")
+			textfile.save(Map,"saved3.txt")
 		end
 		function love.keypressed(key,scancode,isrepeat )
 			if key=='tab' then
