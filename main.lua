@@ -1,4 +1,6 @@
 movement = require "movement"
+controls = require "controls"
+textfile = require "textfile"
 
 function love.load()
 	math.randomseed(os.time())
@@ -17,8 +19,8 @@ function love.load()
 
 	MapByteSize=4
 	canvas = love.graphics.newCanvas(320, 240)
-	--Map = textfile_load("maps/blankmap.txt")
-	Map = textfile_load("maps/saved2.txt")
+	--Map = textfile.load("maps/blankmap.txt")
+	Map = textfile.load("maps/saved2.txt")
 
 	Cursor = {}
 	Cursor.selection = 1
@@ -40,45 +42,14 @@ function spritesheet_load(spr, tw, th)
 	end
 end
 
-function textfile_load(m)
-	local map = {}
-	for row in love.filesystem.lines(m) do
-		table.insert(map, textfile_loadbytes(row))
-	end
-	return map
-end
-
-function textfile_loadbytes(l)
-	local ar={}
-	for a=1, #l, MapByteSize*2 do
-		table.insert( ar, tonumber(string.sub(l, a, a+MapByteSize*2-1),16) )
-	end
-	return ar
-end
-
-function textfile_save(m,n)
-	local str=""
-	for b=1,#m do
-		for a=1,#m[b] do
-			str=str..string.format("%08x",m[b][a])
-		end
-		str=str.."\n"
-	end
-	love.filesystem.write(n, str)
-end
-
 function clamp(n, mi, ma)
 	if n<mi then n=mi
 	elseif n>ma then n=ma end
 	return n
 end
 
-function mousetomapcoords(x,y)
-	return math.floor(x/Scale), math.floor(y/Scale)
-end
-
 function maptotilecoords(x,y)
-	local mousex,mousey = mousetomapcoords(x,y)
+	local mousex,mousey = controls.mousetomapcoords(x,y)
 	local mapx,mapy = math.floor(mousex/TileW), math.floor(mousey/TileH)
 	return mapx,mapy
 end
@@ -174,7 +145,7 @@ function love.update(dt)
 		love.keyboard.setKeyRepeat(false)
 		if love.keyboard.isDown('s') then
 			--save
-			textfile_save(Map,"saved2.txt")
+			textfile.save(Map,"saved2.txt")
 		end
 		function love.keypressed(key,scancode,isrepeat )
 			if key=='tab' then
