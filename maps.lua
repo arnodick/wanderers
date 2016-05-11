@@ -1,36 +1,25 @@
-local bytesize=4
-
 function load(m)
-	local map = {}
-	for row in love.filesystem.lines(m) do
-		table.insert(map, textfile.loadbytes(row))
+	local map = textfile.load(m)
+	for a=1, #map do
+		for b=1, #map[a] do
+			if bit.rshift( bit.band(map[a][b] - 1, 0xffff0000), 16 ) == 1 then
+				makewall((b-1)*TileW, (a-1)*TileH, TileW, TileH)
+			end
+		end
 	end
 	return map
 end
 
-function loadbytes(l)
-	local ar={}
-	for a=1, #l, bytesize*2 do
-		table.insert( ar, tonumber(string.sub(l, a, a+bytesize*2-1),16) )
-	end
-	return ar
-end
-
-function save(m,n)
-	local str=""
+function draw(m)
 	for b=1,#m do
 		for a=1,#m[b] do
-			--str=str..string.format("%08x",m[b][a])
-			str=str..string.format("%0"..tostring(bytesize*2).."x",m[b][a])
+			love.graphics.draw( Spritesheet, Quads[ bit.band(m[b][a] - 1, 0x0000ffff) ],(a-1)*TileW,(b-1)*TileH) --bitwise and is to get just the rightmost 16 bits (non-flag integer)
 		end
-		str=str.."\n"
 	end
-	love.filesystem.write(n, str)
 end
 
 return
 {
 	load = load,
-	loadbytes = loadbytes,
-	save = save,
+	draw = draw,
 }

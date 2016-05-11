@@ -8,6 +8,8 @@ function update()
 	local debuglist={}
 	table.insert(debuglist,love.timer.getTime())
 	table.insert(debuglist,love.timer.getFPS())
+	table.insert(debuglist,"Actors: "..#Actors)
+	table.insert(debuglist,"Walls: "..#Walls)
 	return debuglist
 end
 
