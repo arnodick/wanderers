@@ -1,8 +1,11 @@
 movement = require "movement"
 controls = require "controls"
 textfile = require "textfile"
+editor = require "editor"
+maps = require "maps"
 
 function love.load()
+	DebugList={}
 	math.randomseed(os.time())
 	State=1
 
@@ -19,7 +22,7 @@ function love.load()
 
 	canvas = love.graphics.newCanvas(320, 240)
 	--Map = textfile.load("maps/blankmap.txt")
-	Map = textfile.load("maps/saved3.txt")
+	Map = maps.load("maps/saved3.txt")
 
 	Cursor = {}
 	Cursor.selection = 1
@@ -63,6 +66,8 @@ function makeactor(t,s,x,y,d,v)
 	a.v=v
 	a.tar={0,0}--TODO: change this to tar.x
 	a.vec={0,0}--TODO: change this to vec.x
+	a.colx = 0
+	a.coly = 0
 	a.moving=false
 	table.insert(Actors,a)
 	return a
@@ -87,20 +92,32 @@ function controlactor(a)
 			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
 			a.vec[1] = (vec1/d)
 			a.vec[2] = (vec2/d)
-			a.x=a.x + a.vec[1]*a.v
-			a.y=a.y + a.vec[2]*a.v
+			--a.colx = math.floor( (a.x + a.vec[1]*a.v ) / TileW )
+			--a.coly = math.floor( (a.y + a.vec[2]*a.v ) / TileH )
+			--if Map[a.tar[1]/TileW][a.tar[2]/TileH] == 1 then
+				a.x = a.x + a.vec[1]*a.v
+				a.y = a.y + a.vec[2]*a.v
+			--end
 		end
 	end
 end
 
 function drawactor(a)
 	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y))
+	love.graphics.rectangle( "line", a.colx * TileW, a.coly * TileH, TileW, TileH)
 end
 
-function drawmap(m)
+function drawmap(m,db)
 	for b=1,#m do
 		for a=1,#m[b] do
-			love.graphics.draw(Spritesheet,Quads[m[b][a]-1],(a-1)*TileW,(b-1)*TileH)
+			love.graphics.draw( Spritesheet, Quads[ bit.band(m[b][a] - 1, 0x0000ffff) ],(a-1)*TileW,(b-1)*TileH) --bitwise and is to get just the rightmost 16 bits (non-flag integer)
+			if db then
+				if bit.rshift( bit.band(m[b][a] - 1, 0xffff0000), 16 ) == 1 then --bitwise shift is to get left most 16 bits (flags for solidity, etc.)
+					love.graphics.setColor(255, 0, 0, 255)
+					love.graphics.rectangle( "line", (a-1) * TileW, (b-1) * TileH, TileW, TileH)
+					love.graphics.setColor(255, 255, 255, 255)
+				end
+			end
 		end
 	end
 end
@@ -131,14 +148,16 @@ function love.update(dt)
 			love.event.quit()
 		end
 	elseif State==3 then
-		--controls etc. here
+		--debug/map edit
 		function love.wheelmoved(x, y)
 			Cursor.selection = clamp(y + Cursor.selection,1,60)
 		end
 		function love.mousepressed(x, y, button)
+			local mapx,mapy = maptotilecoords(x,y)
 			if button==1 then
-				local mapx,mapy = maptotilecoords(x,y)
 				Map[mapy+1][mapx+1] = Cursor.selection
+			elseif button==2 then
+				Map[mapy+1][mapx+1] = bit.bor( Map[mapy+1][mapx+1], 0x00010000 )
 			end
 		end
 		love.keyboard.setKeyRepeat(false)
@@ -154,6 +173,7 @@ function love.update(dt)
 		if love.keyboard.isDown('escape') then
 			love.event.quit()
 		end
+		DebugList=editor.update()
 	end
 end
 
@@ -167,9 +187,11 @@ function love.draw(dt)
 			for i,v in ipairs(Actors) do drawactor(v) end
 			drawcursor()
 		elseif State==3 then
-			drawmap(Map)
-			for i,v in ipairs(Actors) do drawactor(v) end
+			drawmap(Map,true)
+			for i,v in ipairs(Actors) do drawactor(v) love.graphics.rectangle("line", v.x, v.y, 8, 8) end
 			drawcursor()
+			editor.draw(DebugList)
+			
 		end
 	love.graphics.setCanvas()
 	love.graphics.draw(canvas,0,0,0,Scale,Scale,0,0)
