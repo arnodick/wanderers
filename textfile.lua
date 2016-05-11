@@ -1,27 +1,30 @@
-local bytesize=4
+local byteamount = 4 --4 bytes (8 hex digits) per cell
 
 function loadbytes(l)
+	--converts a line of hex text into values and inserts them into a 1D array
+	--returns the 1D array
 	local ar={}
-	for a=1, #l, bytesize*2 do
-		table.insert( ar, tonumber(string.sub(l, a, a+bytesize*2-1),16) )
+	for a=1, #l, byteamount*2 do
+		table.insert( ar, tonumber(string.sub(l, a, a+byteamount*2-1),16) )
 	end
 	return ar
 end
 
 function load(m)
-	local map = {}
+	--loads hex values from a textfile into an array row by row
+	--returns a 2D array of datums
+	local data = {}
 	for row in love.filesystem.lines(m) do
-		table.insert(map, textfile.loadbytes(row))
+		table.insert(data, textfile.loadbytes(row))
 	end
-	return map
+	return data
 end
 
 function save(m,n)
 	local str=""
 	for b=1,#m do
 		for a=1,#m[b] do
-			--str=str..string.format("%08x",m[b][a])
-			str=str..string.format("%0"..tostring(bytesize*2).."x",m[b][a])
+			str=str..string.format("%0"..tostring(byteamount*2).."x",m[b][a])
 		end
 		str=str.."\n"
 	end

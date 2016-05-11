@@ -1,5 +1,6 @@
 function load(spr, tw, th)
-	-- takes a spritesheet file(PNG) and some tile sizes and returns the spritesheet object and its QUADS
+	--takes in a spritesheet file(PNG) and some tile sizes
+	--returns the spritesheet object and its QUADS
 	local spritesheet = love.graphics.newImage(spr)
 	local quads = {}
 	local spritesheetW, spritesheetH = spritesheet:getWidth(), spritesheet:getHeight()

@@ -1,9 +1,10 @@
-movement = require "movement"
-controls = require "controls"
-textfile = require "textfile"
-debugger = require "debugger"
-maps = require "maps"
-spritesheets = require "spritesheets"
+debugger 		= require "debugger"
+spritesheets 	= require "spritesheets"
+textfile 		= require "textfile"
+maps 			= require "maps"
+controls 		= require "controls"
+movement 		= require "movement"
+actor			= require "actor"
 
 function love.load()
 	math.randomseed(os.time())
@@ -36,7 +37,7 @@ function love.load()
 	Cursor = {}
 	Cursor.selection = 1
 
-	Player = makeactor(1,50,20,20,0,0.5) -- spawns player
+	Player = actor.make(1,50,20,20,0,0.5) --spawns player
 end
 
 function clamp(n, mi, ma)
@@ -58,63 +59,6 @@ function makewall(x,y,w,h)
 	wall.w=w
 	wall.h=h
 	table.insert(Walls,wall)
-end
-
-function makeactor(t,s,x,y,d,v)
-	local a={}
-	a.t=t
-	a.s=s
-	a.x=x
-	a.y=y
-	a.d=d
-	a.v=v
-	a.tar={x,y}--TODO: change this to tar.x
-	a.vec={0,0}--TODO: change this to vec.x
-	a.colx = 0
-	a.coly = 0
-	a.moving=false
-	a.id = #Actors + 1
-	table.insert(Actors,a)
-	return a
-end
-
-function collideactor(a, targets)
-	for i,v in ipairs(targets) do
-		if  a.x + a.vec[1]*a.v > v.x - 1 -- the -1 is just so hit pixel is visible always, maybe won't need it later
-		and a.x + a.vec[1]*a.v < v.x + v.w
-		and a.y + a.vec[2]*a.v > v.y - 1
-		and a.y + a.vec[2]*a.v < v.y + v.h then
-			return true
-		end
-	end
-	return false
-end
-
-function controlactor(a)
-	if a.moving then
-		local d = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
-		local move = false
-		if d<1 then
-			a.moving=false
-		else
-			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
-			a.vec[1] = (vec1/d)
-			a.vec[2] = (vec2/d)
-			if not collideactor(a, Walls) then
-				a.x = a.x + a.vec[1] * a.v
-				a.y = a.y + a.vec[2] * a.v
-			end
-		end
-	end
-end
-
-function drawactor(a)
-	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x) - TileW/2,math.floor(a.y) - TileH/2)
-	if DebugMode then
-		love.graphics.setColor(0, 255, 0, 255)
-		love.graphics.line( a.x, a.y, a.tar[1], a.tar[2] )
-		love.graphics.setColor(255, 255, 255, 255)
-	end
 end
 
 function drawcursor()
@@ -183,7 +127,7 @@ function love.update(dt)
 	if State == 1 then --title screen
 		--title screen logic HEEEEEERE
 	elseif State == 2 then --gameplay
-		for i,v in ipairs(Actors) do controlactor(v) end
+		for i,v in ipairs(Actors) do actor.control(v) end
 	elseif State == -1 then --editor
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
 	end
@@ -197,12 +141,12 @@ function love.draw(dt)
 		love.graphics.print("THE WANDERERS",40,100)
 	elseif State == 2 then
 		maps.draw(Map)
-		for i,v in ipairs(Actors) do drawactor(v) end
+		for i,v in ipairs(Actors) do actor.draw(v) end
 		drawcursor()
 	elseif State == -1 then
 		maps.draw(Map)
 		love.graphics.setColor(255, 0, 0, 255)
-		for i,v in ipairs(Actors) do drawactor(v) end
+		for i,v in ipairs(Actors) do actor.draw(v) end
 		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
 		drawcursor()
 		love.graphics.print("EDITOR",130,10)

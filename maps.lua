@@ -1,5 +1,6 @@
 function getflag(c,f)
-	--takes the hex value from map cell and an integer flag position, returns true if that flag position is set
+	--takes the hex value from map cell and an integer flag position
+	--returns true if that flag position is set
 	local flag = 2^(f-1) --converts flag position to its actual number value (ie: f 1 = 1, f 2 = 2, f 3 = 4, f 4 = 8 etc.)
 	if bit.band ( bit.rshift( c, 16 ), flag ) == flag then --checks if flag f is set in the map cell. ignores other flags.
 		return true
@@ -9,7 +10,8 @@ function getflag(c,f)
 end
 
 function load(m)
-	--loads map sprites and walls from a hex populated textfile, returns map array
+	--loads map sprites and walls from a hex populated textfile
+	--returns map array
 	local map = textfile.load(m) --each cell (flags + integer) is loaded into map array
 	for a=1, #map do
 		for b=1, #map[a] do
