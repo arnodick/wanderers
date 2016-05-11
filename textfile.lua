@@ -1,19 +1,19 @@
 local bytesize=4
 
-function load(m)
-	local map = {}
-	for row in love.filesystem.lines(m) do
-		table.insert(map, textfile.loadbytes(row))
-	end
-	return map
-end
-
 function loadbytes(l)
 	local ar={}
 	for a=1, #l, bytesize*2 do
 		table.insert( ar, tonumber(string.sub(l, a, a+bytesize*2-1),16) )
 	end
 	return ar
+end
+
+function load(m)
+	local map = {}
+	for row in love.filesystem.lines(m) do
+		table.insert(map, textfile.loadbytes(row))
+	end
+	return map
 end
 
 function save(m,n)
@@ -30,7 +30,7 @@ end
 
 return
 {
-	load = load,
 	loadbytes = loadbytes,
+	load = load,
 	save = save,
 }
