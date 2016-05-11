@@ -193,10 +193,9 @@ function love.draw(dt)
 			love.graphics.setColor(255, 0, 0, 255)
 			for i,v in ipairs(Actors) do drawactor(v) love.graphics.rectangle("line", v.x-TileW/2, v.y-TileH/2, TileW, TileH) end
 			for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
-			--love.graphics.setColor(255, 255, 255, 255)
+			love.graphics.setColor(255, 255, 255, 255)
 			drawcursor()
 			editor.draw(DebugList)
-			
 		end
 	love.graphics.setCanvas()
 	love.graphics.draw(Canvas,0,0,0,Scale,Scale,0,0)
