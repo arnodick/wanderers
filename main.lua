@@ -72,8 +72,21 @@ function makeactor(t,s,x,y,d,v)
 	a.colx = 0
 	a.coly = 0
 	a.moving=false
+	a.id = #Actors + 1
 	table.insert(Actors,a)
 	return a
+end
+
+function collideactor(a, targets)
+	for i,v in ipairs(targets) do
+		if  a.x + a.vec[1]*a.v > v.x
+		and a.x + a.vec[1]*a.v < v.x + v.w
+		and a.y + a.vec[2]*a.v > v.y
+		and a.y + a.vec[2]*a.v < v.y + v.h then
+			return true
+		end
+	end
+	return false
 end
 
 function controlactor(a)
@@ -82,8 +95,8 @@ function controlactor(a)
 		if button==1 then
 			a.moving=true
 			a.tar[1],a.tar[2] = maptotilecoords(x,y)
-			a.tar[1]=a.tar[1]*TileW + TileW/2
-			a.tar[2]=a.tar[2]*TileH + TileH/2
+			a.tar[1]=a.tar[1] * TileW + TileW/2
+			a.tar[2]=a.tar[2] * TileH + TileH/2
 		end
 	end
 	
@@ -96,21 +109,10 @@ function controlactor(a)
 			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
 			a.vec[1] = (vec1/d)
 			a.vec[2] = (vec2/d)
-			for i,v in ipairs(Walls) do
-				if a.x + a.vec[1]*a.v > v.x
-				and a.x + a.vec[1]*a.v < v.x + v.w
-				and a.y + a.vec[2]*a.v > v.y
-				and a.y + a.vec[2]*a.v < v.y + v.h then
-					--hit wall
-				else
-					move = true
-				end
+			if not collideactor(a, Walls) then
+				a.x = a.x + a.vec[1] * a.v
+				a.y = a.y + a.vec[2] * a.v
 			end
-			--end
-		end
-		if move then
-			a.x = a.x + a.vec[1]*a.v
-			a.y = a.y + a.vec[2]*a.v
 		end
 	end
 end
@@ -120,7 +122,6 @@ function drawactor(a)
 	love.graphics.setColor(0, 255, 0, 255)
 	love.graphics.points( a.x, a.y )
 	love.graphics.setColor(255, 255, 255, 255)
---	love.graphics.rectangle( "line", a.colx * TileW + TileW/2, a.coly * TileH + TileH/2, TileW, TileH)
 end
 
 function drawcursor()
@@ -133,11 +134,11 @@ function drawcursor()
 end
 
 function love.update(dt)
-	if State==1 then
+	if State==1 then --title screen
 		if love.keyboard.isDown('z') then
 			State=2
 		end
-	elseif State==2 then
+	elseif State==2 then --gameplay
 		for i,v in ipairs(Actors) do controlactor(v) end
 		love.keyboard.setKeyRepeat(false)
 		function love.keypressed(key,scancode,isrepeat)
@@ -148,8 +149,7 @@ function love.update(dt)
 		if love.keyboard.isDown('escape') then
 			love.event.quit()
 		end
-	elseif State==3 then
-		--debug/map edit
+	elseif State==3 then --editor/debug
 		function love.wheelmoved(x, y)
 			Cursor.selection = clamp(y + Cursor.selection,1,60)
 		end
