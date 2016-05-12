@@ -1,7 +1,7 @@
 function update()
 	local debuglist={}
 --	table.insert(debuglist,love.timer.getTime())
-	table.insert(debuglist,love.timer.getFPS())
+	table.insert(debuglist,"FPS: "..love.timer.getFPS())
 	table.insert(debuglist,"Turn timer: "..Turn.timer)
 	table.insert(debuglist,"Slowdown timer: "..Slowdown.timer)
 	table.insert(debuglist,"Slowdown rate: "..Slowdown.rate)
@@ -13,7 +13,9 @@ function update()
 	table.insert(debuglist,"Player Vec Y: "..Player.vec[2])
 	table.insert(debuglist,"Player Dir: "..math.atan(Player.vec[2],Player.vec[1]))
 	table.insert(debuglist,"Player Vel: "..Player.v)
---	table.insert(debuglist,"Player Dir: "..Player.d)
+	table.insert(debuglist,"Save: "..love.filesystem.getSaveDirectory())
+	table.insert(debuglist,"test: "..Butt)
+	table.insert(debuglist,"Files: "..Files[1])
 	return debuglist
 end
 

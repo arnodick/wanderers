@@ -7,19 +7,24 @@ movement 		= require "movement"
 actor			= require "actor"
 
 function love.load()
+	--enumerators (DUHHHHHHHHHHHHH DURRRR FLUHHH BLUh)
 	Enums = {}
+	--actors
 	Enums.player = 0
 	Enums.wall = 1
+	--gamestates
 	Enums.title = 1
 	Enums.gameplay = 2
 	Enums.editor = -1
 
+	--game initialization stuff (just boring stuff you need to have Video Game work)
 	math.randomseed(os.time())
 	DebugMode=false
 	DebugList={}
 	Actors={}
 	Walls={}
 	
+	--global variables
 	State=1
 	Scale=4
 	TileW=8
@@ -33,6 +38,7 @@ function love.load()
 	Turn.timer=0
 	Turn.length=180
 
+	--graphics settings and asset inits
 	Spritesheet, Quads = spritesheets.load("gfx/sprites.png", TileW, TileH)
 	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
 	love.graphics.setLineStyle("rough") --clean SHAPE scaling
@@ -44,10 +50,16 @@ function love.load()
 
 	Canvas = love.graphics.newCanvas(320, 240)
 
+	--game asset inits (map, entities, sounds, etc)
 	Map = maps.load("maps/saved3.txt")
 	Cursor = {}
 	Cursor.selection = 1
+	Sound = love.audio.newSource("sounds/amb.wav")
+	Sound:setLooping(true)
+
 	Player = actor.make(0,50,20,20,0,0.5) --spawns player
+	rawset(_G, "Butt", 14)
+	Files = love.filesystem.getDirectoryItems("")
 end
 
 function clamp(n, mi, ma)
@@ -121,6 +133,7 @@ end
 function love.mousepressed(x, y, button)
 	if State == 1 then
 		State = 2
+		Sound:play()
 	elseif State == 2 then
 		if button==1 then
 			--if Turn.timer == 0 then
@@ -146,13 +159,19 @@ function love.update(dt)
 		--title screen logic HEEEEEERE
 	elseif State == 2 then --gameplay
 		--if math.floor(love.timer.getTime()) % 2 == 0 then --LURCHINESS!
-		if Turn.timer > 0 then
-			if Slowdown.timer >= Slowdown.rate then
-				for i,v in ipairs(Actors) do actor.control(v) end
-				Slowdown.timer = 0
-				Turn.timer = Turn.timer - 1
-			end
+		if Slowdown.timer >= Slowdown.rate then --slows down time!
+			for i,v in ipairs(Actors) do actor.control(v) end
+			Slowdown.timer = 0
+			Turn.timer = Turn.timer - 1
 		end
+		local slowdowndir = 0
+		if Player.v > 0 then
+			slowdowndir = -0.05
+		else
+			slowdowndir = 0.05
+		end
+		Slowdown.rate = clamp(Slowdown.rate + slowdowndir, 1, 5)
+		Sound:setPitch(2/Slowdown.rate)
 	elseif State == -1 then --editor
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
 	end
@@ -181,7 +200,10 @@ function love.draw(dt)
 		love.graphics.setColor(255, 0, 0, 255)
 		for i,v in ipairs(Actors) do love.graphics.rectangle("line", v.x-TileW/2, v.y-TileH/2, TileW, TileH) end
 		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
-		debugger.draw(DebugList)
+		--debugger.draw(DebugList)
+		for i,v in ipairs(Files) do
+			love.graphics.print(v,160,10+10*i)
+		end
 	end
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
