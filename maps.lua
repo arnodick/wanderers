@@ -10,12 +10,13 @@ function getflag(c,f)
 end
 
 function load(m)
-	--loads map sprites and walls from a hex populated textfile
+	--loads map sprites and walls/entities from a hex populated textfile
 	--returns map array
 	local map = textfile.load(m) --each cell (flags + integer) is loaded into map array
 	for a=1, #map do
 		for b=1, #map[a] do
-			if getflag(map[a][b], 1) then
+			--TODO WE CAN MAKE THIS LOAD THINGS LIKE CRAWLERS AND SPAWN POINTS WITH DIFFERENT FLAGS
+			if getflag(map[a][b], Enums.wall) then
 				makewall((b-1)*TileW, (a-1)*TileH, TileW, TileH) --each cell that has a wall flag loads a wall entity
 			end
 		end

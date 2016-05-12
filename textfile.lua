@@ -21,6 +21,8 @@ function load(m)
 end
 
 function save(m,n)
+	--takes an array of hex data and a filename string
+	--converts hex data into text and saves it in a file
 	local str=""
 	for b=1,#m do
 		for a=1,#m[b] do

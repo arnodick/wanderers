@@ -7,11 +7,16 @@ movement 		= require "movement"
 actor			= require "actor"
 
 function love.load()
+	Enums = {}
+	Enums.player = 0
+	Enums.wall = 1
+	Enums.title = 1
+	Enums.gameplay = 2
+	Enums.editor = -1
+
 	math.randomseed(os.time())
 	DebugMode=false
 	DebugList={}
-	Spritesheet={}
-	Quads={}
 	Actors={}
 	Walls={}
 	
@@ -20,11 +25,18 @@ function love.load()
 	TileW=8
 	TileH=8
 
-	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
-	love.graphics.setLineStyle("rough") --clean SHAPE scaling
-	love.mouse.setVisible(false)
+	Slowdown={}
+	Slowdown.rate=5
+	Slowdown.timer=0
+
+	Turn={}
+	Turn.timer=0
+	Turn.length=180
 
 	Spritesheet, Quads = spritesheets.load("gfx/sprites.png", TileW, TileH)
+	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
+	love.graphics.setLineStyle("rough") --clean SHAPE scaling
+	love.mouse.setVisible(true)
 
 	Font = love.graphics.newFont("fonts/Kongtext Regular.ttf",10)
 	Font:setFilter("nearest","nearest",0) --clean TEXT scaling
@@ -33,11 +45,9 @@ function love.load()
 	Canvas = love.graphics.newCanvas(320, 240)
 
 	Map = maps.load("maps/saved3.txt")
-
 	Cursor = {}
 	Cursor.selection = 1
-
-	Player = actor.make(1,50,20,20,0,0.5) --spawns player
+	Player = actor.make(0,50,20,20,0,0.5) --spawns player
 end
 
 function clamp(n, mi, ma)
@@ -77,7 +87,11 @@ function love.keypressed(key,scancode,isrepeat)
 			State = 2
 		end
 	else
-		if key == 'tab' then
+		if key == 'space' then
+			if Turn.timer == 0 then
+				Turn.timer = Turn.length
+			end
+		elseif key == 'tab' then
 			if State ~= -1 then 
 				State = -1
 			else
@@ -97,7 +111,9 @@ function love.keypressed(key,scancode,isrepeat)
 end
 
 function love.wheelmoved(x, y)
-	if State == -1 then
+	if State == 2 then
+		Slowdown.rate = clamp(y/10 + Slowdown.rate,1,15)
+	elseif State == -1 then
 		Cursor.selection = clamp(y + Cursor.selection,1,60)
 	end
 end
@@ -107,10 +123,12 @@ function love.mousepressed(x, y, button)
 		State = 2
 	elseif State == 2 then
 		if button==1 then
-			Player.moving=true
+			--if Turn.timer == 0 then
+			Player.v = Player.spd
 			Player.tar[1],Player.tar[2] = maptotilecoords(x,y)
 			Player.tar[1]=Player.tar[1] * TileW + TileW/2
 			Player.tar[2]=Player.tar[2] * TileH + TileH/2
+			--end
 		end
 	elseif State == -1 then
 		local mapx,mapy = maptotilecoords(x,y)
@@ -127,10 +145,18 @@ function love.update(dt)
 	if State == 1 then --title screen
 		--title screen logic HEEEEEERE
 	elseif State == 2 then --gameplay
-		for i,v in ipairs(Actors) do actor.control(v) end
+		--if math.floor(love.timer.getTime()) % 2 == 0 then --LURCHINESS!
+		if Turn.timer > 0 then
+			if Slowdown.timer >= Slowdown.rate then
+				for i,v in ipairs(Actors) do actor.control(v) end
+				Slowdown.timer = 0
+				Turn.timer = Turn.timer - 1
+			end
+		end
 	elseif State == -1 then --editor
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
 	end
+	Slowdown.timer = Slowdown.timer + 1
 	DebugList = debugger.update()
 end
 

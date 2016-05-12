@@ -4,26 +4,29 @@ function make(t,s,x,y,d,v)
 	a.s=s --sprite
 	a.x=x
 	a.y=y
-	a.d=d --direction
+--	a.d=d --direction --NOTE: don't need this?
 	a.v=v --velocity
+	a.spd=0.5
 	a.tar={x,y}--TODO: change this to tar.x
 	a.vec={0,0}--TODO: change this to vec.x
-	a.moving=false
+--	a.moving=false
 	a.id = #Actors + 1
 	table.insert(Actors,a)
 	return a
 end
 
 function control(a)
-	if a.moving then
-		local d = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
-		local move = false
-		if d<1 then
-			a.moving=false
+--	if a.moving then
+	if a.v > 0 then
+		local dist = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
+		if dist < 1 then
+--			a.moving=false
+			--TODO: put snap to grid stuff here
+			a.v=0
 		else
 			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
-			a.vec[1] = (vec1/d)
-			a.vec[2] = (vec2/d)
+			a.vec[1] = (vec1/dist)
+			a.vec[2] = (vec2/dist)
 			if not actor.collide(a, Walls) then
 				a.x = a.x + a.vec[1] * a.v
 				a.y = a.y + a.vec[2] * a.v
