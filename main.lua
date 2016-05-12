@@ -60,6 +60,19 @@ function love.load()
 	Player = actor.make(0,50,20,20,0,0.5) --spawns player
 	rawset(_G, "Butt", 14)
 	Files = love.filesystem.getDirectoryItems("")
+	for i = #Files,1,-1 do
+		if not love.filesystem.isFile(Files[i]) then
+			table.remove(Files, i)
+		else
+			local filedata = love.filesystem.newFileData("code", Files[i])
+			local filename = filedata:getFilename()
+			if filedata:getExtension(filedata) == "txt" 
+			or filename == "conf.lua"
+			or filename == "main.lua" then
+				table.remove(Files, i)
+			end
+		end
+	end
 end
 
 function clamp(n, mi, ma)
