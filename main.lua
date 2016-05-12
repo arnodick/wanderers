@@ -1,10 +1,22 @@
-debugger 		= require "debugger"
-spritesheets 	= require "spritesheets"
-textfile 		= require "textfile"
-maps 			= require "maps"
-controls 		= require "controls"
-movement 		= require "movement"
-actor			= require "actor"
+Files = love.filesystem.getDirectoryItems("")
+for i = #Files,1,-1 do
+	if not love.filesystem.isFile(Files[i]) then
+		table.remove(Files, i)
+	else
+		local filedata = love.filesystem.newFileData("code", Files[i])
+		local filename = filedata:getFilename()
+		if filedata:getExtension(filedata) ~= "lua" 
+		or filename == "conf.lua"
+		or filename == "main.lua" then
+			table.remove(Files, i)
+		else
+			Files[i] = string.gsub (filename, ".lua", "")
+		end
+	end
+end
+for i = 1, #Files do
+	rawset( _G, Files[i], require(Files[i]) )
+end
 
 function love.load()
 	--enumerators (DUHHHHHHHHHHHHH DURRRR FLUHHH BLUh)
@@ -17,7 +29,7 @@ function love.load()
 	Enums.gameplay = 2
 	Enums.editor = -1
 
-	--game initialization stuff (just boring stuff you need to have Video Game work)
+	--game initialization stuff (just boring stuff you need to maek Video Game)
 	math.randomseed(os.time())
 	DebugMode=false
 	DebugList={}
@@ -58,33 +70,6 @@ function love.load()
 	Sound:setLooping(true)
 
 	Player = actor.make(0,50,20,20,0,0.5) --spawns player
-	rawset(_G, "Butt", 14)
-	Files = love.filesystem.getDirectoryItems("")
-	for i = #Files,1,-1 do
-		if not love.filesystem.isFile(Files[i]) then
-			table.remove(Files, i)
-		else
-			local filedata = love.filesystem.newFileData("code", Files[i])
-			local filename = filedata:getFilename()
-			if filedata:getExtension(filedata) == "txt" 
-			or filename == "conf.lua"
-			or filename == "main.lua" then
-				table.remove(Files, i)
-			end
-		end
-	end
-end
-
-function clamp(n, mi, ma)
-	if n<mi then n=mi
-	elseif n>ma then n=ma end
-	return n
-end
-
-function maptotilecoords(x,y)
-	local mousex,mousey = controls.mousetomapcoords(x,y)
-	local mapx,mapy = math.floor(mousex/TileW), math.floor(mousey/TileH)
-	return mapx,mapy
 end
 
 function makewall(x,y,w,h)
@@ -97,7 +82,7 @@ function makewall(x,y,w,h)
 end
 
 function drawcursor()
-	local mapx,mapy = maptotilecoords(love.mouse.getPosition())
+	local mapx,mapy = test.maptotilecoords(love.mouse.getPosition())
 	love.graphics.setColor(255, 0, 0, 255)
 	love.graphics.rectangle("line",mapx*TileW,mapy*TileH,TileW+1,TileH+1)
 	love.graphics.draw(Spritesheet,Quads[Cursor.selection-1],mapx*TileW,mapy*TileH)
@@ -137,9 +122,9 @@ end
 
 function love.wheelmoved(x, y)
 	if State == 2 then
-		Slowdown.rate = clamp(y/10 + Slowdown.rate,1,15)
+		Slowdown.rate = maths.clamp(y/10 + Slowdown.rate,1,15)
 	elseif State == -1 then
-		Cursor.selection = clamp(y + Cursor.selection,1,60)
+		Cursor.selection = maths.clamp(y + Cursor.selection,1,60)
 	end
 end
 
@@ -151,13 +136,13 @@ function love.mousepressed(x, y, button)
 		if button==1 then
 			--if Turn.timer == 0 then
 			Player.v = Player.spd
-			Player.tar[1],Player.tar[2] = maptotilecoords(x,y)
+			Player.tar[1],Player.tar[2] = test.maptotilecoords(x,y)
 			Player.tar[1]=Player.tar[1] * TileW + TileW/2
 			Player.tar[2]=Player.tar[2] * TileH + TileH/2
 			--end
 		end
 	elseif State == -1 then
-		local mapx,mapy = maptotilecoords(x,y)
+		local mapx,mapy = test.maptotilecoords(x,y)
 		if button==1 then
 			Map[mapy+1][mapx+1] = Cursor.selection
 		elseif button==2 then
@@ -183,7 +168,7 @@ function love.update(dt)
 		else
 			slowdowndir = 0.05
 		end
-		Slowdown.rate = clamp(Slowdown.rate + slowdowndir, 1, 5)
+		Slowdown.rate = maths.clamp(Slowdown.rate + slowdowndir, 1, 5)
 		Sound:setPitch(2/Slowdown.rate)
 	elseif State == -1 then --editor
 		--editor logic HEEEERE(?) maybe menu stuff or whatever

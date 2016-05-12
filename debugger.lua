@@ -14,8 +14,6 @@ function update()
 	table.insert(debuglist,"Player Dir: "..math.atan(Player.vec[2],Player.vec[1]))
 	table.insert(debuglist,"Player Vel: "..Player.v)
 	table.insert(debuglist,"Save: "..love.filesystem.getSaveDirectory())
-	table.insert(debuglist,"test: "..Butt)
-	table.insert(debuglist,"Files: "..Files[1])
 	return debuglist
 end
 

@@ -1,3 +1,5 @@
+
+
 function getflag(c,f)
 	--takes the hex value from map cell and an integer flag position
 	--returns true if that flag position is set
