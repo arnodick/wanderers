@@ -1,7 +1,5 @@
 function maptotilecoords(x,y)
-	local mousex,mousey = controls.mousetomapcoords(x,y)
-	local mapx,mapy = math.floor(mousex/TileW), math.floor(mousey/TileH)
-	return mapx,mapy
+	return math.floor(x/TileW), math.floor(y/TileH)
 end
 
 return

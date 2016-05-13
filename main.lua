@@ -82,7 +82,7 @@ function makewall(x,y,w,h)
 end
 
 function drawcursor()
-	local mapx,mapy = test.maptotilecoords(love.mouse.getPosition())
+	local mapx,mapy = test.maptotilecoords(controls.mousetomapcoords(love.mouse.getPosition()))
 	love.graphics.setColor(255, 0, 0, 255)
 	love.graphics.rectangle("line",mapx*TileW,mapy*TileH,TileW+1,TileH+1)
 	love.graphics.draw(Spritesheet,Quads[Cursor.selection-1],mapx*TileW,mapy*TileH)
@@ -129,6 +129,7 @@ function love.wheelmoved(x, y)
 end
 
 function love.mousepressed(x, y, button)
+	x, y = controls.mousetomapcoords(x,y)
 	if State == 1 then
 		State = 2
 		Sound:play()
