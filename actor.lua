@@ -16,36 +16,38 @@ function make(t,s,x,y,d,v)
 end
 
 function control(a)
---	if a.moving then
 	if a.v > 0 then
 		local dist = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
 		if dist < 1 then
---			a.moving=false
 			--TODO: put snap to grid stuff here
-			a.v=0
+			a.v = 0
 		else
 			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
 			a.vec[1] = (vec1/dist)
 			a.vec[2] = (vec2/dist)
-			if not actor.collide(a, Walls) then
-				a.x = a.x + a.vec[1] * a.v
-				a.y = a.y + a.vec[2] * a.v
+			local xdest = a.x + a.vec[1] * a.v
+			local ydest = a.y + a.vec[2] * a.v
+			local colhor = false
+			local colver = false
+			for i,v in ipairs(Walls) do
+				if movement.collidepoint(xdest, ydest, v) then
+					if movement.collidepoint(xdest, a.y, v) then
+						colhor = true
+					end
+					if movement.collidepoint(a.x, ydest, v) then
+						colver = true
+					end
+				end
+			end
+			--TODO: fix case where if you hit a corner and don't move
+			if not colhor then
+				a.x = xdest
+			end
+			if not colver then
+				a.y = ydest
 			end
 		end
 	end
-end
-
-function collide(a, targets)
-	for i,v in ipairs(targets) do
-		--local dir = 0x0
-		if  a.x + a.vec[1]*a.v > v.x - 1 -- the -1 is just so hit pixel is visible always, maybe won't need it later
-		and a.x + a.vec[1]*a.v < v.x + v.w
-		and a.y + a.vec[2]*a.v > v.y - 1
-		and a.y + a.vec[2]*a.v < v.y + v.h then
-			return true
-		end
-	end
-	return false
 end
 
 function draw(a)
@@ -61,6 +63,5 @@ return
 {
 	make = make,
 	control = control,
-	collide = collide,
 	draw = draw,
 }
