@@ -199,10 +199,7 @@ function love.draw(dt)
 		love.graphics.setColor(255, 0, 0, 255)
 		for i,v in ipairs(Actors) do love.graphics.rectangle("line", v.x-TileW/2, v.y-TileH/2, TileW, TileH) end
 		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
-		--debugger.draw(DebugList)
-		for i,v in ipairs(Files) do
-			love.graphics.print(v,160,10+10*i)
-		end
+		debugger.draw(DebugList)
 	end
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
