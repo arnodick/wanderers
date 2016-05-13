@@ -37,6 +37,7 @@ end
 
 function collide(a, targets)
 	for i,v in ipairs(targets) do
+		--local dir = 0x0
 		if  a.x + a.vec[1]*a.v > v.x - 1 -- the -1 is just so hit pixel is visible always, maybe won't need it later
 		and a.x + a.vec[1]*a.v < v.x + v.w
 		and a.y + a.vec[2]*a.v > v.y - 1

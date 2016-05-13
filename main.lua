@@ -1,21 +1,16 @@
-Files = love.filesystem.getDirectoryItems("")
-for i = #Files,1,-1 do
-	if not love.filesystem.isFile(Files[i]) then
-		table.remove(Files, i)
-	else
-		local filedata = love.filesystem.newFileData("code", Files[i])
-		local filename = filedata:getFilename()
-		if filedata:getExtension(filedata) ~= "lua" 
-		or filename == "conf.lua"
-		or filename == "main.lua" then
-			table.remove(Files, i)
-		else
-			Files[i] = string.gsub (filename, ".lua", "")
+--loads all the library.lua files you've made
+--it is dynamic ie if you put a library.lua file in the working directory it will load it into the game automatically
+local files = love.filesystem.getDirectoryItems("") --get all the files+directories in working dir
+for i = #files,1,-1 do
+	if love.filesystem.isFile(files[i]) then --if it isn't a directory
+		local filedata = love.filesystem.newFileData("code", files[i])
+		local filename = filedata:getFilename() --get the file's name
+		if filedata:getExtension(filedata) == "lua" --if it's a lua file and isn't a reserved file
+		and filename ~= "conf.lua"
+		and filename ~= "main.lua" then --it's a library, so include it
+			rawset( _G, string.gsub(filename, ".lua", ""), require(string.gsub(filename, ".lua", "")) ) --TODO do we need rawset here?
 		end
 	end
-end
-for i = 1, #Files do
-	rawset( _G, Files[i], require(Files[i]) )
 end
 
 function love.load()
