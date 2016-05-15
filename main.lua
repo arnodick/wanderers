@@ -38,12 +38,10 @@ function love.load()
 	TileH=8
 
 	Slowdown={}
-	Slowdown.rate=5
+	Slowdown.amount=10
 	Slowdown.timer=0
 
-	Turn={}
-	Turn.timer=0
-	Turn.length=180
+	Timer=0
 
 	--graphics settings and asset inits
 	Spritesheet, Quads = spritesheets.load("gfx/sprites.png", TileW, TileH)
@@ -64,7 +62,7 @@ function love.load()
 	Sound = love.audio.newSource("sounds/amb.wav")
 	Sound:setLooping(true)
 
-	Player = actor.make(0,50,20,20,0,0.5) --spawns player
+	Player = actor.make(0,50,20,20,0.5) --spawns player
 end
 
 function makewall(x,y,w,h)
@@ -92,11 +90,7 @@ function love.keypressed(key,scancode,isrepeat)
 			State = 2
 		end
 	else
-		if key == 'space' then
-			if Turn.timer == 0 then
-				Turn.timer = Turn.length
-			end
-		elseif key == 'tab' then
+		if key == 'tab' then
 			if State ~= -1 then 
 				State = -1
 			else
@@ -117,7 +111,7 @@ end
 
 function love.wheelmoved(x, y)
 	if State == 2 then
-		Slowdown.rate = maths.clamp(y/10 + Slowdown.rate,1,15)
+		Slowdown.amount = maths.clamp(y/10 + Slowdown.amount,1,15)
 	elseif State == -1 then
 		Cursor.selection = maths.clamp(y + Cursor.selection,1,60)
 	end
@@ -129,13 +123,23 @@ function love.mousepressed(x, y, button)
 		State = 2
 		Sound:play()
 	elseif State == 2 then
-		if button==1 then
-			--if Turn.timer == 0 then
+		if button == 1 then
 			Player.v = Player.spd
 			Player.tar[1],Player.tar[2] = test.maptotilecoords(x,y)
-			Player.tar[1]=Player.tar[1] * TileW + TileW/2
-			Player.tar[2]=Player.tar[2] * TileH + TileH/2
-			--end
+			Player.tar[1] = Player.tar[1] * TileW + TileW/2
+			Player.tar[2] = Player.tar[2] * TileH + TileH/2
+			local dist = movement.distance(Player.x,Player.y,Player.tar[1],Player.tar[2])
+			local vec1, vec2 = movement.vector(Player.x,Player.y,Player.tar[1],Player.tar[2])
+			Player.vec[1] = (vec1/dist)
+			Player.vec[2] = (vec2/dist)
+		elseif button == 2 then
+			local bullet = actor.make(2,65,Player.x,Player.y,1)
+			bullet.tar[1], bullet.tar[2] = controls.mousetomapcoords(love.mouse.getPosition())
+			local dist = movement.distance(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
+			local vec1, vec2 = movement.vector(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
+			bullet.vec[1] = (vec1/dist)
+			bullet.vec[2] = (vec2/dist)
+			bullet.v = bullet.spd
 		end
 	elseif State == -1 then
 		local mapx,mapy = test.maptotilecoords(x,y)
@@ -153,19 +157,19 @@ function love.update(dt)
 		--title screen logic HEEEEEERE
 	elseif State == 2 then --gameplay
 		--if math.floor(love.timer.getTime()) % 2 == 0 then --LURCHINESS!
-		if Slowdown.timer >= Slowdown.rate then --slows down time!
-			for i,v in ipairs(Actors) do actor.control(v) end
+		if Slowdown.timer >= Slowdown.amount then --slows down time!
+			for i,v in ipairs(Actors) do actor.control(v, i) end
 			Slowdown.timer = 0
-			Turn.timer = Turn.timer - 1
+			Timer = Timer + 1
 		end
 		local slowdowndir = 0
 		if Player.v > 0 then
-			slowdowndir = -0.05
+			slowdowndir = -0.1
 		else
-			slowdowndir = 0.05
+			slowdowndir = 0.1
 		end
-		Slowdown.rate = maths.clamp(Slowdown.rate + slowdowndir, 1, 5)
-		Sound:setPitch(2/Slowdown.rate)
+		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, 10)
+		Sound:setPitch(2/Slowdown.amount)
 	elseif State == -1 then --editor
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
 	end
@@ -191,8 +195,9 @@ function love.draw(dt)
 		love.graphics.print("EDITOR",130,10)
 	end
 	if DebugMode then
-		love.graphics.setColor(255, 0, 0, 255)
+		love.graphics.setColor(0, 0, 255, 255)
 		for i,v in ipairs(Actors) do love.graphics.rectangle("line", v.x-TileW/2, v.y-TileH/2, TileW, TileH) end
+		love.graphics.setColor(255, 0, 0, 255)
 		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
 		debugger.draw(DebugList)
 	end
