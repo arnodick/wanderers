@@ -41,8 +41,9 @@ function love.load()
 	TileH=8
 
 	Slowdown={}
-	Slowdown.amount=10
 	Slowdown.timer=0
+	Slowdown.max=6
+	Slowdown.amount=Slowdown.max
 
 	Timer=0
 
@@ -69,6 +70,7 @@ function love.load()
 	Cursor.selection = 1
 	Sound = love.audio.newSource("sounds/amb.wav")
 	Sound:setLooping(true)
+	Gun = love.audio.newSource("sounds/gun.wav")
 
 	Player = actor.make(0,50,20,20,0.5,1) --spawns player
 end
@@ -106,6 +108,12 @@ function love.keypressed(key,scancode,isrepeat)
 			end
 		elseif key == '`' then
 			DebugMode = not DebugMode
+			--local fontset = (FontDebug and DebugMode)
+			if DebugMode then
+				love.graphics.setFont(FontDebug)
+			else
+				love.graphics.setFont(Font)
+			end
 		elseif key == 's' then
 			if State == Enums.editor then
 				textfile.save(Map,"saved3.txt")
@@ -118,9 +126,7 @@ function love.keypressed(key,scancode,isrepeat)
 end
 
 function love.wheelmoved(x, y)
-	if State == Enums.gameplay then
-		Slowdown.amount = maths.clamp(y/10 + Slowdown.amount,1,15)
-	elseif State == Enums.editor then
+	if State == Enums.editor then
 		Cursor.selection = maths.clamp(y + Cursor.selection,1,60)
 	end
 end
@@ -141,6 +147,9 @@ function love.mousepressed(x, y, button)
 			Player.vec[1] = (vec1/dist)
 			Player.vec[2] = (vec2/dist)
 		elseif button == 2 then
+			--Gun:play()
+			love.audio.rewind(Gun)
+			love.audio.play(Gun)
 			local bullet = actor.make(2,65,Player.x,Player.y,5,2)
 			bullet.tar[1], bullet.tar[2] = controls.mousetomapcoords(love.mouse.getPosition())
 			local dist = movement.distance(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
@@ -171,13 +180,19 @@ function love.update(dt)
 			Timer = Timer + 1
 		end
 		local slowdowndir = 0
+		
 		if Player.v > 0 then
-			slowdowndir = -0.1
-		else
-			slowdowndir = 0.1
+			if movement.distance(Player.x,Player.y,Player.tar[1],Player.tar[2]) < 10 then
+				slowdowndir = 0.1
+			else
+				slowdowndir = -0.1
+			end
+		--else
+		--	slowdowndir = 0.1
 		end
-		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, 10)
-		Sound:setPitch(2/Slowdown.amount)
+		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
+		Sound:setPitch(1/Slowdown.amount)
+		Gun:setPitch(1/Slowdown.amount)
 	elseif State == Enums.editor then
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
 	end
@@ -209,8 +224,8 @@ function love.draw(dt)
 	if DebugMode then
 		love.graphics.setColor(0, 0, 255, 255)
 		for i,v in ipairs(Actors) do love.graphics.rectangle("line", v.x-TileW/2, v.y-TileH/2, TileW, TileH) end
-		love.graphics.setColor(255, 0, 0, 255)
-		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
+		--love.graphics.setColor(255, 0, 0, 255)
+		--for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
 	end
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
