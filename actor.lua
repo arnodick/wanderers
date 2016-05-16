@@ -1,10 +1,11 @@
-function make(t,s,x,y,spd)
+function make(t,s,x,y,spd,mt)
 	local a={}
 	a.t=t --type (player,enemy, etc)
 	a.s=s --sprite
 	a.x=x
 	a.y=y
 	a.spd=spd
+	a.mt=mt
 	a.v=0 --velocity
 	a.tar={x,y}--TODO: change this to tar.x
 	a.vec={0,0}--TODO: change this to vec.x
@@ -17,7 +18,7 @@ function control(a, id)
 	if a.v > 0 then
 		local xdest = a.x + a.vec[1] * a.v
 		local ydest = a.y + a.vec[2] * a.v
-		if a.t == 0 then
+		if a.mt == Enums.walk then
 			local dist = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
 			if dist < a.v then
 				--TODO: put snap to grid stuff here
@@ -43,7 +44,7 @@ function control(a, id)
 					a.y = ydest
 				end
 			end
-		elseif a.t == 2 then
+		elseif a.mt == Enums.bullet then
 			for i,v in ipairs(Walls) do
 				if movement.collidepoint(xdest, ydest, v) then
 					table.remove(Actors,id)
@@ -56,7 +57,7 @@ function control(a, id)
 end
 
 function draw(a)
-	--love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x) - TileW/2,math.floor(a.y) - TileH/2, Timer/10, 1, 1, TileW/2, TileH/2)
+	--love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x+math.cos(Slowdown.timer/Slowdown.amount*a.v)),math.floor(a.y+math.sin(Slowdown.timer/Slowdown.amount*a.v)), math.atan2(a.vec[2],a.vec[1]), 1, 1, TileW/2, TileH/2)
 	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y), math.atan2(a.vec[2],a.vec[1]), 1, 1, TileW/2, TileH/2)
 	if DebugMode then
 		love.graphics.setColor(0, 255, 0, 255)

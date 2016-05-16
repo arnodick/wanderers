@@ -19,9 +19,10 @@ end
 
 function draw(debuglist)
 	love.graphics.setColor(0, 0, 255, 255)
+	love.graphics.setFont(FontDebug)
 	love.graphics.print("DEBUG",130,0)
 	for i,v in ipairs(debuglist) do
-		love.graphics.print(v,10,10+10*i)
+		love.graphics.print(v,10,10+FontDebug:getHeight()*i)
 	end
 end
 
