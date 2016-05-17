@@ -14,6 +14,29 @@ for i = #files,1,-1 do
 end
 
 function love.load()
+ 	Shader = love.graphics.newShader
+	[[
+	extern number screenWidth;
+	vec4 effect (vec4 color,Image texture,vec2 texture_coords,vec2 screen_coords)
+	{
+		//if(screen_coords.x > 640)
+		//	{return vec4(1,0,0,1);}
+		//else
+		//	{return vec4(0,0,1,1);}
+		vec4 pixel = Texel(texture, texture_coords); //current pixel colour
+		number average = (pixel.r + pixel.b + pixel.g) / 3;
+		number factor = screen_coords.x/screenWidth;
+		//pixel.r = pixel.r + (average-pixel.r) * factor;
+		//pixel.g = pixel.g + (average-pixel.g) * factor;
+		pixel.r = pixel.r -0.2;
+		//pixel.g = 1;
+		//pixel.b = 1;
+		//pixel.t = 1;
+		return pixel;
+    }
+ 	]]
+	--Shader:send("screenWidth", 1280)
+
 	--enumerators (DUHHHHHHHHHHHHH DURRRR FLUHHH BLUh)
 	Enums = {}
 	--actors
@@ -39,6 +62,7 @@ function love.load()
 	Scale=4
 	TileW=8
 	TileH=8
+	Screen={}
 
 	Slowdown={}
 	Slowdown.timer=0
@@ -48,7 +72,7 @@ function love.load()
 	Timer=0
 
 	--graphics settings and asset inits
-	
+	--love.window.setFullscreen(true, "desktop")
 	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
 	love.graphics.setLineStyle("rough") --clean SHAPE scaling
 	love.graphics.setBlendMode("replace")
@@ -60,9 +84,14 @@ function love.load()
 	Font:setFilter("nearest","nearest",0) --clean TEXT scaling
 	love.graphics.setFont(Font)
 
+	--sets the width and height of the game itself (320 x 240, old school res)
+	local gw,gh = love.graphics.getDimensions() --this is getting window w and h from conf.lua so DONT WORRY
+	gw = gw/Scale
+	gh = gh/Scale
 	Canvas = {}
-	Canvas.game = love.graphics.newCanvas(320, 240)
-	Canvas.debug = love.graphics.newCanvas(1280, 960)
+	Canvas.game = love.graphics.newCanvas(gw,gh)
+	--sets width and height of debug overlay (size of window)
+	Canvas.debug = love.graphics.newCanvas(love.graphics.getDimensions())
 
 	--game asset inits (map, entities, sounds, etc)
 	Map = maps.load("maps/saved3.txt")
@@ -201,6 +230,7 @@ function love.update(dt)
 end
 
 function love.draw(dt)
+	love.graphics.setShader(Shader)
 	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
 	love.graphics.setBlendMode("replace")
 	--love.graphics.setCanvas(Canvas.debug) --sets drawing to the 320x240 canvas
@@ -230,16 +260,15 @@ function love.draw(dt)
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
 	love.graphics.draw(Canvas.game, 0,0,0,Scale,Scale,0,0) --just like draws everything to the screen or whatever
+	love.graphics.setShader()
 	if DebugMode then
 		love.graphics.setCanvas(Canvas.debug) --sets drawing to the 1280 x 960 debug canvas
 		love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
-		love.graphics.setBackgroundColor(0,0,0,0)
+		--love.graphics.setBackgroundColor(0,0,0,0)
 		debugger.draw(DebugList)
 		love.graphics.setCanvas() --sets drawing back to screen
-		love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 		love.graphics.setBlendMode("add")
 		love.graphics.draw(Canvas.debug,0,0,0,1,1,0,0) --just like draws everything to the screen or whatever
-		--love.graphics.setCanvas(Canvas.game) --sets drawing to the 1280 x 960 debug canvas
 	end
 	--love.graphics.draw(Canvas.debug,0,0,0,1,1,0,0) --just like draws everything to the screen or whatever
 end

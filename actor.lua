@@ -54,6 +54,12 @@ function control(a, id)
 			a.y = ydest
 		end
 	end
+	if a.x < 0 - 320
+	or a.x > #Map[1]*TileW + 320
+	or a.y < 0 - 240
+	or a.y > #Map*TileH + 240 then
+		table.remove(Actors,id)
+	end
 end
 
 function draw(a)
