@@ -17,13 +17,17 @@ function update(cursor)
 	--cursor.x, cursor.y = mapcoords(mx/(Screen.width/GameWidth), my/Screen.scale)
 end
 
-function draw(cursor)
+function draw(cursor,snap)
 	--need to fix this now that fullscreen
-	local mapx,mapy = mapcoords(cursor.x,cursor.y)
-	love.graphics.setColor(255, 0, 0, 255)
-	love.graphics.rectangle("line",mapx*TileW,mapy*TileH,TileW+1,TileH+1)
-	love.graphics.draw(Spritesheet,Quads[cursor.selection-1],mapx*TileW,mapy*TileH)
-	love.graphics.print(cursor.selection,mapx*TileW+TileW+1,mapy*TileH+TileH+1)
+	if snap then
+		love.graphics.setColor(255, 0, 0, 255)
+		local mapx,mapy = mapcoords(cursor.x,cursor.y)
+		love.graphics.rectangle("line",mapx*TileW,mapy*TileH,TileW+1,TileH+1)
+		love.graphics.draw(Spritesheet,Quads[cursor.selection-1],mapx*TileW,mapy*TileH)
+		love.graphics.print(cursor.selection,mapx*TileW+TileW+1,mapy*TileH+TileH+1)
+	else
+		love.graphics.rectangle("line",cursor.x-1,cursor.y-1,TileW+2,TileH+2)
+	end
 	love.graphics.setColor(255, 255, 255, 255)
 end
 

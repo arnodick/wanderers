@@ -1,14 +1,16 @@
 --loads all the library.lua files you've made
---it is dynamic ie if you put a library.lua file in the working directory it will load it into the game automatically
+--it's dynamic ie if you put a library.lua file in the working directory it will load it into the game automatically
 local files = love.filesystem.getDirectoryItems("") --get all the files+directories in working dir
-for i = #files,1,-1 do
+for i = #files,1,-1 do --decrements bc had to delete files from a table before
 	if love.filesystem.isFile(files[i]) then --if it isn't a directory
 		local filedata = love.filesystem.newFileData("code", files[i])
 		local filename = filedata:getFilename() --get the file's name
 		if filedata:getExtension(filedata) == "lua" --if it's a lua file and isn't a reserved file
 		and filename ~= "conf.lua"
 		and filename ~= "main.lua" then --it's a library, so include it
-			rawset( _G, string.gsub(filename, ".lua", ""), require(string.gsub(filename, ".lua", "")) ) --TODO do we need rawset here?
+			filename = string.gsub(filename, ".lua", "")
+			--rawset( _G, filename, require(filename) ) --TODO do we need rawset here?
+			_G[filename] = require(filename)
 		end
 	end
 end
@@ -56,6 +58,12 @@ function love.load()
 	DebugList={}
 	Actors={}
 	Walls={}
+
+	function ScreenUpdate()
+		Screen.width,Screen.height=love.graphics.getDimensions()
+		Screen.scale=Screen.height/GameHeight
+		Screen.xoff=(Screen.width-GameWidth*Screen.scale)/2
+	end
 	
 	--global variables
 	State=1
@@ -64,20 +72,19 @@ function love.load()
 	GameWidth=320
 	GameHeight=240
 	Screen={}
-	Screen.width,Screen.height=love.graphics.getDimensions()
-	Screen.scale=Screen.height/GameHeight
-	Screen.xoff=(Screen.width-GameWidth*Screen.scale)/2
+	ScreenUpdate()
 
 	Slowdown={}
 	Slowdown.timer=0
 	Slowdown.max=6
 	Slowdown.amount=Slowdown.max
+	Slowdown["blah"]=14
 
 	Timer=0
 
 	--graphics settings and asset inits
 	--love.window.setFullscreen(true, "desktop")
-	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
+	love.graphics.setDefaultFilter("nearest","nearest",1) --clean SPRITE scaling
 	love.graphics.setLineStyle("rough") --clean SHAPE scaling
 	love.graphics.setBlendMode("replace")
 	love.mouse.setVisible(false)
@@ -137,6 +144,10 @@ function love.keypressed(key,scancode,isrepeat)
 			if State == Enums.editor then
 				textfile.save(Map,"saved3.txt")
 			end
+		elseif key == 'f' then
+			love.window.setFullscreen(not love.window.getFullscreen())
+			ScreenUpdate()
+			Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
 		end
 	end
 	if key == 'escape' then
@@ -151,33 +162,30 @@ function love.wheelmoved(x, y)
 end
 
 function love.mousepressed(x, y, button)
-	x,y = Cursor.x, Cursor.y
+	--x,y = Cursor.x, Cursor.y
 	if State == Enums.title then
 		State = Enums.gameplay
 		Sound:play()
 	elseif State == Enums.gameplay then
 		if button == 1 then
 			Player.v = Player.spd
-			Player.tar[1],Player.tar[2] = cursor.mapcoords(x,y)
-			Player.tar[1] = Player.tar[1] * TileW + TileW/2
-			Player.tar[2] = Player.tar[2] * TileH + TileH/2
+			Player.tar[1],Player.tar[2] = Cursor.x + TileW/2, Cursor.y + TileH/2
 		elseif button == 2 then
 			love.audio.rewind(Gun)
 			love.audio.play(Gun)
 			local bullet = actor.make(2,65,Player.x,Player.y,5,2)
-			bullet.tar[1], bullet.tar[2] = Cursor.x, Cursor.y
-			local dist = movement.distance(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
+			bullet.tar[1], bullet.tar[2] = Cursor.x + TileW/2, Cursor.y + TileH/2
 			local vec1, vec2 = movement.vector(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
-			bullet.vec[1] = (vec1/dist)
-			bullet.vec[2] = (vec2/dist)
+			bullet.vec[1], bullet.vec[2] = movement.normalize(vec1, vec2, movement.distance(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2]))
 			bullet.v = bullet.spd
 		end
 	elseif State == Enums.editor then
-		local mapx,mapy = cursor.mapcoords(x,y)
+		local mapx,mapy = cursor.mapcoords(Cursor.x,Cursor.y)
 		if button == 1 then
 			Map[mapy+1][mapx+1] = Cursor.selection
 		elseif button == 2 then
 			Map[mapy+1][mapx+1] = bit.bor( Map[mapy+1][mapx+1], 0x00010000 )
+			--TODO: make this delete entities as well?
 			makewall((mapx)*TileW, (mapy)*TileH, TileW, TileH)
 		end
 	end
@@ -216,7 +224,7 @@ function love.update(dt)
 end
 
 function love.draw(dt)
-	love.graphics.setShader(Shader)
+--	love.graphics.setShader(Shader)
 	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
 	love.graphics.setBlendMode("replace")
 	love.graphics.setCanvas(Canvas.game) --sets drawing to the 320x240 canvas
@@ -226,13 +234,13 @@ function love.draw(dt)
 	elseif State == 2 then
 		maps.draw(Map)
 		for i,v in ipairs(Actors) do actor.draw(v) end
-		cursor.draw(Cursor)
+		cursor.draw(Cursor, false)
 	elseif State == -1 then
 		maps.draw(Map)
 		love.graphics.setColor(255, 0, 0, 255)
 		for i,v in ipairs(Actors) do actor.draw(v) end
 		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
-		cursor.draw(Cursor)
+		cursor.draw(Cursor, true)
 		love.graphics.print("EDITOR",130,10)
 	end
 	if DebugMode then
