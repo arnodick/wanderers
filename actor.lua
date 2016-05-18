@@ -16,10 +16,15 @@ end
 
 function control(a, id)
 	if a.v > 0 then
-		local xdest = a.x + a.vec[1] * a.v
-		local ydest = a.y + a.vec[2] * a.v
+		--TODO: update vector here
 		if a.mt == Enums.walk then
 			local dist = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
+			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
+			--TODO: make normalize function
+			a.vec[1] = (vec1/dist)
+			a.vec[2] = (vec2/dist)
+			local xdest = a.x + a.vec[1] * a.v
+			local ydest = a.y + a.vec[2] * a.v
 			if dist < a.v then
 				--TODO: put snap to grid stuff here
 				a.v = 0
@@ -45,6 +50,8 @@ function control(a, id)
 				end
 			end
 		elseif a.mt == Enums.bullet then
+			local xdest = a.x + a.vec[1] * a.v
+			local ydest = a.y + a.vec[2] * a.v
 			for i,v in ipairs(Walls) do
 				if movement.collidepoint(xdest, ydest, v) then
 					table.remove(Actors,id)
@@ -54,10 +61,10 @@ function control(a, id)
 			a.y = ydest
 		end
 	end
-	if a.x < 0 - 320
-	or a.x > #Map[1]*TileW + 320
-	or a.y < 0 - 240
-	or a.y > #Map*TileH + 240 then
+	if a.x < 0 - GameWidth
+	or a.x > #Map[1]*TileW + GameWidth
+	or a.y < 0 - GameHeight
+	or a.y > #Map*TileH + GameHeight then
 		table.remove(Actors,id)
 	end
 end

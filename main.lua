@@ -28,7 +28,7 @@ function love.load()
 		number factor = screen_coords.x/screenWidth;
 		//pixel.r = pixel.r + (average-pixel.r) * factor;
 		//pixel.g = pixel.g + (average-pixel.g) * factor;
-		pixel.r = pixel.r -0.2;
+		//pixel.r = pixel.r -0.2;
 		//pixel.g = 1;
 		//pixel.b = 1;
 		//pixel.t = 1;
@@ -59,10 +59,14 @@ function love.load()
 	
 	--global variables
 	State=1
-	Scale=4
 	TileW=8
 	TileH=8
+	GameWidth=320
+	GameHeight=240
 	Screen={}
+	Screen.width,Screen.height=love.graphics.getDimensions()
+	Screen.scale=Screen.height/GameHeight
+	Screen.xoff=(Screen.width-GameWidth*Screen.scale)/2
 
 	Slowdown={}
 	Slowdown.timer=0
@@ -76,7 +80,7 @@ function love.load()
 	love.graphics.setDefaultFilter("nearest","nearest",0) --clean SPRITE scaling
 	love.graphics.setLineStyle("rough") --clean SHAPE scaling
 	love.graphics.setBlendMode("replace")
-	love.mouse.setVisible(true)
+	love.mouse.setVisible(false)
 	Spritesheet, Quads = spritesheets.load("gfx/sprites.png", TileW, TileH)
 
 	Font = love.graphics.newFont("fonts/Kongtext Regular.ttf",10)
@@ -84,19 +88,14 @@ function love.load()
 	Font:setFilter("nearest","nearest",0) --clean TEXT scaling
 	love.graphics.setFont(Font)
 
-	--sets the width and height of the game itself (320 x 240, old school res)
-	local gw,gh = love.graphics.getDimensions() --this is getting window w and h from conf.lua so DONT WORRY
-	gw = gw/Scale
-	gh = gh/Scale
+	
 	Canvas = {}
-	Canvas.game = love.graphics.newCanvas(gw,gh)
-	--sets width and height of debug overlay (size of window)
-	Canvas.debug = love.graphics.newCanvas(love.graphics.getDimensions())
+	Canvas.game = love.graphics.newCanvas(GameWidth,GameHeight) --sets width and height of fictional retro video game (320x240)
+	Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
 
 	--game asset inits (map, entities, sounds, etc)
 	Map = maps.load("maps/saved3.txt")
-	Cursor = {}
-	Cursor.selection = 1
+	Cursor = cursor.make(love.mouse.getPosition())
 	Sound = love.audio.newSource("sounds/amb.wav")
 	Sound:setLooping(true)
 	Gun = love.audio.newSource("sounds/gun.wav")
@@ -111,15 +110,6 @@ function makewall(x,y,w,h)
 	wall.w=w
 	wall.h=h
 	table.insert(Walls,wall)
-end
-
-function drawcursor()
-	local mapx,mapy = test.maptotilecoords(controls.mousetomapcoords(love.mouse.getPosition()))
-	love.graphics.setColor(255, 0, 0, 255)
-	love.graphics.rectangle("line",mapx*TileW,mapy*TileH,TileW+1,TileH+1)
-	love.graphics.draw(Spritesheet,Quads[Cursor.selection-1],mapx*TileW,mapy*TileH)
-	love.graphics.print(Cursor.selection,mapx*TileW+TileW+1,mapy*TileH+TileH+1)
-	love.graphics.setColor(255, 255, 255, 255)
 end
 
 function love.keypressed(key,scancode,isrepeat)
@@ -161,26 +151,21 @@ function love.wheelmoved(x, y)
 end
 
 function love.mousepressed(x, y, button)
-	x, y = controls.mousetomapcoords(x,y)
+	x,y = Cursor.x, Cursor.y
 	if State == Enums.title then
 		State = Enums.gameplay
 		Sound:play()
 	elseif State == Enums.gameplay then
-		if button == Enums.title then
+		if button == 1 then
 			Player.v = Player.spd
-			Player.tar[1],Player.tar[2] = test.maptotilecoords(x,y)
+			Player.tar[1],Player.tar[2] = cursor.mapcoords(x,y)
 			Player.tar[1] = Player.tar[1] * TileW + TileW/2
 			Player.tar[2] = Player.tar[2] * TileH + TileH/2
-			local dist = movement.distance(Player.x,Player.y,Player.tar[1],Player.tar[2])
-			local vec1, vec2 = movement.vector(Player.x,Player.y,Player.tar[1],Player.tar[2])
-			Player.vec[1] = (vec1/dist)
-			Player.vec[2] = (vec2/dist)
 		elseif button == 2 then
-			--Gun:play()
 			love.audio.rewind(Gun)
 			love.audio.play(Gun)
 			local bullet = actor.make(2,65,Player.x,Player.y,5,2)
-			bullet.tar[1], bullet.tar[2] = controls.mousetomapcoords(love.mouse.getPosition())
+			bullet.tar[1], bullet.tar[2] = Cursor.x, Cursor.y
 			local dist = movement.distance(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
 			local vec1, vec2 = movement.vector(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
 			bullet.vec[1] = (vec1/dist)
@@ -188,7 +173,7 @@ function love.mousepressed(x, y, button)
 			bullet.v = bullet.spd
 		end
 	elseif State == Enums.editor then
-		local mapx,mapy = test.maptotilecoords(x,y)
+		local mapx,mapy = cursor.mapcoords(x,y)
 		if button == 1 then
 			Map[mapy+1][mapx+1] = Cursor.selection
 		elseif button == 2 then
@@ -199,6 +184,7 @@ function love.mousepressed(x, y, button)
 end
 
 function love.update(dt)
+	cursor.update(Cursor)
 	if State == Enums.title then
 		--title screen logic HEEEEEERE
 	elseif State == Enums.gameplay then
@@ -233,8 +219,6 @@ function love.draw(dt)
 	love.graphics.setShader(Shader)
 	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
 	love.graphics.setBlendMode("replace")
-	--love.graphics.setCanvas(Canvas.debug) --sets drawing to the 320x240 canvas
-	--love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
 	love.graphics.setCanvas(Canvas.game) --sets drawing to the 320x240 canvas
 	love.graphics.setBackgroundColor(0,0,0,0)
 	if State == 1 then
@@ -242,13 +226,13 @@ function love.draw(dt)
 	elseif State == 2 then
 		maps.draw(Map)
 		for i,v in ipairs(Actors) do actor.draw(v) end
-		drawcursor()
+		cursor.draw(Cursor)
 	elseif State == -1 then
 		maps.draw(Map)
 		love.graphics.setColor(255, 0, 0, 255)
 		for i,v in ipairs(Actors) do actor.draw(v) end
 		for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
-		drawcursor()
+		cursor.draw(Cursor)
 		love.graphics.print("EDITOR",130,10)
 	end
 	if DebugMode then
@@ -259,7 +243,7 @@ function love.draw(dt)
 	end
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
-	love.graphics.draw(Canvas.game, 0,0,0,Scale,Scale,0,0) --just like draws everything to the screen or whatever
+	love.graphics.draw(Canvas.game,0+Screen.xoff,0,0,Screen.scale,Screen.scale,0,0) --just like draws everything to the screen or whatever
 	love.graphics.setShader()
 	if DebugMode then
 		love.graphics.setCanvas(Canvas.debug) --sets drawing to the 1280 x 960 debug canvas
@@ -268,7 +252,6 @@ function love.draw(dt)
 		debugger.draw(DebugList)
 		love.graphics.setCanvas() --sets drawing back to screen
 		love.graphics.setBlendMode("add")
-		love.graphics.draw(Canvas.debug,0,0,0,1,1,0,0) --just like draws everything to the screen or whatever
+		love.graphics.draw(Canvas.debug,0+Screen.xoff,0,0,1,1,0,0) --just like draws everything to the screen or whatever
 	end
-	--love.graphics.draw(Canvas.debug,0,0,0,1,1,0,0) --just like draws everything to the screen or whatever
 end
