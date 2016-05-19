@@ -65,7 +65,8 @@ function control(a, id)
 end
 
 function draw(a)
-	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y), math.atan2(a.vec.y,a.vec.x), 1, 1, TileW/2, TileH/2)
+	--love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y), math.atan2(a.vec.y,a.vec.x), 1, 1, TileW/2, TileH/2)
+	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x + Slowdown.timer/Slowdown.amount*(a.vec.x * a.v) ),math.floor(a.y + Slowdown.timer/Slowdown.amount*(a.vec.y * a.v) ), math.atan2(a.vec.y,a.vec.x), 1, 1, TileW/2, TileH/2) --FUCK YEAH. TODO: should these heavy calculations be done outside of draw function?
 	if DebugMode then
 		love.graphics.setColor(0, 255, 0, 255)
 		love.graphics.line( a.x, a.y, a.tar.x, a.tar.y )

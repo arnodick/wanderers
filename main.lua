@@ -220,10 +220,10 @@ function love.update(dt)
 		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
 		Sound:setPitch(1/Slowdown.amount)
 		Gun:setPitch(1/Slowdown.amount)
+		Slowdown.timer = Slowdown.timer + 1
 	elseif State == Enums.editor then
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
 	end
-	Slowdown.timer = Slowdown.timer + 1
 	DebugList = debugger.update()
 end
 
