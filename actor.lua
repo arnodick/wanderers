@@ -16,13 +16,9 @@ end
 
 function control(a, id)
 	if a.v > 0 then
-		--TODO: update vector here
 		if a.mt == Enums.walk then
 			local dist = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
-			local vec1, vec2 = movement.vector(a.x,a.y,a.tar[1],a.tar[2])
-			--TODO: make normalize function
-			a.vec[1] = (vec1/dist)
-			a.vec[2] = (vec2/dist)
+			a.vec[1], a.vec[2] = movement.normalize(movement.vector(a.x,a.y,a.tar[1],a.tar[2]))
 			local xdest = a.x + a.vec[1] * a.v
 			local ydest = a.y + a.vec[2] * a.v
 			if dist < a.v then
@@ -70,7 +66,6 @@ function control(a, id)
 end
 
 function draw(a)
-	--love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x+math.cos(Slowdown.timer/Slowdown.amount*a.v)),math.floor(a.y+math.sin(Slowdown.timer/Slowdown.amount*a.v)), math.atan2(a.vec[2],a.vec[1]), 1, 1, TileW/2, TileH/2)
 	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y), math.atan2(a.vec[2],a.vec[1]), 1, 1, TileW/2, TileH/2)
 	if DebugMode then
 		love.graphics.setColor(0, 255, 0, 255)

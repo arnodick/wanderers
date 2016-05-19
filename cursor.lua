@@ -7,14 +7,12 @@ function make(x,y)
 end
 
 function mapcoords(x,y)
-	--return math.floor(x/Screen.scale), math.floor(y/Screen.scale)
 	return math.floor(x/TileW), math.floor(y/TileH)
 end
 
 function update(cursor)
 	local mx,my=love.mouse.getPosition()
 	cursor.x, cursor.y = mx/(Screen.width/GameWidth), my/Screen.scale
-	--cursor.x, cursor.y = mapcoords(mx/(Screen.width/GameWidth), my/Screen.scale)
 end
 
 function draw(cursor,snap)

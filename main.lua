@@ -83,7 +83,6 @@ function love.load()
 	Timer=0
 
 	--graphics settings and asset inits
-	--love.window.setFullscreen(true, "desktop")
 	love.graphics.setDefaultFilter("nearest","nearest",1) --clean SPRITE scaling
 	love.graphics.setLineStyle("rough") --clean SHAPE scaling
 	love.graphics.setBlendMode("replace")
@@ -175,8 +174,7 @@ function love.mousepressed(x, y, button)
 			love.audio.play(Gun)
 			local bullet = actor.make(2,65,Player.x,Player.y,5,2)
 			bullet.tar[1], bullet.tar[2] = Cursor.x + TileW/2, Cursor.y + TileH/2
-			local vec1, vec2 = movement.vector(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2])
-			bullet.vec[1], bullet.vec[2] = movement.normalize(vec1, vec2, movement.distance(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2]))
+			bullet.vec[1], bullet.vec[2] = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2]))
 			bullet.v = bullet.spd
 		end
 	elseif State == Enums.editor then
@@ -210,8 +208,6 @@ function love.update(dt)
 			else
 				slowdowndir = -0.1
 			end
-		--else
-		--	slowdowndir = 0.1
 		end
 		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
 		Sound:setPitch(1/Slowdown.amount)
