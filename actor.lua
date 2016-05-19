@@ -9,7 +9,7 @@ function make(t,s,x,y,spd,mt)
 	a.v=0 --velocity
 	a.tar={} a.tar.x=0 a.tar.y=0
 	a.vec={} a.vec.x=0 a.vec.y=0
-	a.id = #Actors + 1
+	--a.id = #Actors + 1
 	table.insert(Actors,a)
 	return a
 end
@@ -17,12 +17,11 @@ end
 function control(a, id)
 	if a.v > 0 then
 		if a.mt == Enums.walk then
-			local dist = movement.distance(a.x,a.y,a.tar.x,a.tar.y)
 			a.vec.x, a.vec.y = movement.normalize(movement.vector(a.x,a.y,a.tar.x,a.tar.y))
 			local xdest = a.x + a.vec.x * a.v
 			local ydest = a.y + a.vec.y * a.v
-			if dist < a.v then
-				--TODO: put snap to grid stuff here
+			if movement.distance(a.x,a.y,a.tar.x,a.tar.y) < a.v then
+				--TODO: put snap to grid stuff here maybe?
 				a.v = 0
 			else
 				local colhor = false

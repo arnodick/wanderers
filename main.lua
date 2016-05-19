@@ -15,6 +15,12 @@ for i = #files,1,-1 do --decrements bc had to delete files from a table before
 	end
 end
 
+function ScreenUpdate()
+	Screen.width,Screen.height=love.graphics.getDimensions()
+	Screen.scale=Screen.height/GameHeight
+	Screen.xoff=(Screen.width-GameWidth*Screen.scale)/2
+end
+
 function love.load()
  	Shader = love.graphics.newShader
 	[[
@@ -58,12 +64,6 @@ function love.load()
 	DebugList={}
 	Actors={}
 	Walls={}
-
-	function ScreenUpdate()
-		Screen.width,Screen.height=love.graphics.getDimensions()
-		Screen.scale=Screen.height/GameHeight
-		Screen.xoff=(Screen.width-GameWidth*Screen.scale)/2
-	end
 	
 	--global variables
 	State=1
@@ -161,7 +161,6 @@ function love.wheelmoved(x, y)
 end
 
 function love.mousepressed(x, y, button)
-	--x,y = Cursor.x, Cursor.y
 	if State == Enums.title then
 		State = Enums.gameplay
 		Sound:play()
@@ -182,9 +181,18 @@ function love.mousepressed(x, y, button)
 		if button == 1 then
 			Map[mapy+1][mapx+1] = Cursor.selection
 		elseif button == 2 then
-			Map[mapy+1][mapx+1] = bit.bor( Map[mapy+1][mapx+1], 0x00010000 )
-			--TODO: make this delete entities as well?
-			makewall((mapx)*TileW, (mapy)*TileH, TileW, TileH)
+			Map[mapy+1][mapx+1] = bit.bxor(Map[mapy+1][mapx+1], 0x00010000) --switches the flag of the selected map cell
+			--TODO: make a function that iterates over a table of entities, returns if collided (also check distance BEFORE checking collision to be more efficient)
+			local col=false
+			for i,v in ipairs(Walls) do --checks if a wall is in cell, deletes it if is, makes a wall if not
+				if collidepoint(Cursor.x, Cursor.y, v) then
+					table.remove(Walls,i)
+					col=true
+				end
+			end
+			if not col then
+				makewall((mapx)*TileW, (mapy)*TileH, TileW, TileH)
+			end
 		end
 	end
 end
