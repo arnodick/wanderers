@@ -7,8 +7,8 @@ function make(t,s,x,y,spd,mt)
 	a.spd=spd
 	a.mt=mt
 	a.v=0 --velocity
-	a.tar={x,y}--TODO: change this to tar.x
-	a.vec={0,0}--TODO: change this to vec.x
+	a.tar={} a.tar.x=0 a.tar.y=0
+	a.vec={} a.vec.x=0 a.vec.y=0
 	a.id = #Actors + 1
 	table.insert(Actors,a)
 	return a
@@ -17,10 +17,10 @@ end
 function control(a, id)
 	if a.v > 0 then
 		if a.mt == Enums.walk then
-			local dist = movement.distance(a.x,a.y,a.tar[1],a.tar[2])
-			a.vec[1], a.vec[2] = movement.normalize(movement.vector(a.x,a.y,a.tar[1],a.tar[2]))
-			local xdest = a.x + a.vec[1] * a.v
-			local ydest = a.y + a.vec[2] * a.v
+			local dist = movement.distance(a.x,a.y,a.tar.x,a.tar.y)
+			a.vec.x, a.vec.y = movement.normalize(movement.vector(a.x,a.y,a.tar.x,a.tar.y))
+			local xdest = a.x + a.vec.x * a.v
+			local ydest = a.y + a.vec.y * a.v
 			if dist < a.v then
 				--TODO: put snap to grid stuff here
 				a.v = 0
@@ -46,8 +46,8 @@ function control(a, id)
 				end
 			end
 		elseif a.mt == Enums.bullet then
-			local xdest = a.x + a.vec[1] * a.v
-			local ydest = a.y + a.vec[2] * a.v
+			local xdest = a.x + a.vec.x * a.v
+			local ydest = a.y + a.vec.y * a.v
 			for i,v in ipairs(Walls) do
 				if movement.collidepoint(xdest, ydest, v) then
 					table.remove(Actors,id)
@@ -66,10 +66,10 @@ function control(a, id)
 end
 
 function draw(a)
-	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y), math.atan2(a.vec[2],a.vec[1]), 1, 1, TileW/2, TileH/2)
+	love.graphics.draw(Spritesheet,Quads[a.s],math.floor(a.x),math.floor(a.y), math.atan2(a.vec.y,a.vec.x), 1, 1, TileW/2, TileH/2)
 	if DebugMode then
 		love.graphics.setColor(0, 255, 0, 255)
-		love.graphics.line( a.x, a.y, a.tar[1], a.tar[2] )
+		love.graphics.line( a.x, a.y, a.tar.x, a.tar.y )
 		love.graphics.setColor(255, 255, 255, 255)
 	end
 end

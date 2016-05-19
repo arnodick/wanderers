@@ -168,13 +168,13 @@ function love.mousepressed(x, y, button)
 	elseif State == Enums.gameplay then
 		if button == 1 then
 			Player.v = Player.spd
-			Player.tar[1],Player.tar[2] = Cursor.x + TileW/2, Cursor.y + TileH/2
+			Player.tar.x,Player.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
 		elseif button == 2 then
 			love.audio.rewind(Gun)
 			love.audio.play(Gun)
 			local bullet = actor.make(2,65,Player.x,Player.y,5,2)
-			bullet.tar[1], bullet.tar[2] = Cursor.x + TileW/2, Cursor.y + TileH/2
-			bullet.vec[1], bullet.vec[2] = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar[1],bullet.tar[2]))
+			bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
+			bullet.vec.x, bullet.vec.y = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
 			bullet.v = bullet.spd
 		end
 	elseif State == Enums.editor then
@@ -203,7 +203,7 @@ function love.update(dt)
 		local slowdowndir = 0
 		
 		if Player.v > 0 then
-			if movement.distance(Player.x,Player.y,Player.tar[1],Player.tar[2]) < 10 then
+			if movement.distance(Player.x,Player.y,Player.tar.x,Player.tar.y) < 10 then
 				slowdowndir = 0.1
 			else
 				slowdowndir = -0.1
