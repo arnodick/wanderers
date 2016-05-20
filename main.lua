@@ -76,7 +76,7 @@ function love.load()
 
 	Slowdown={}
 	Slowdown.timer=0
-	Slowdown.max=6
+	Slowdown.max=8
 	Slowdown.amount=Slowdown.max
 	Slowdown["blah"]=14
 
@@ -104,9 +104,14 @@ function love.load()
 	Cursor = cursor.make(love.mouse.getPosition())
 	Sound = love.audio.newSource("sounds/amb.wav")
 	Sound:setLooping(true)
-	Gun = love.audio.newSource("sounds/gun.wav")
+	Shoot = love.audio.newSource("sounds/gun.wav")
 
-	Player = actor.make(0,50,20,20,0.5,1) --spawns player
+	Gun = {}
+	Gun.size = 6
+	Gun.amount = Gun.size
+	Gun.reload = 0
+
+	Player = actor.make(0,50,20,20,0.5,Enums.walk) --spawns player
 end
 
 function makewall(x,y,w,h)
@@ -147,6 +152,8 @@ function love.keypressed(key,scancode,isrepeat)
 			love.window.setFullscreen(not love.window.getFullscreen())
 			ScreenUpdate()
 			Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
+		elseif key == 'r' then
+			Gun.reload = 60
 		end
 	end
 	if key == 'escape' then
@@ -169,12 +176,15 @@ function love.mousepressed(x, y, button)
 			Player.v = Player.spd
 			Player.tar.x,Player.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
 		elseif button == 2 then
-			love.audio.rewind(Gun)
-			love.audio.play(Gun)
-			local bullet = actor.make(2,65,Player.x,Player.y,5,2)
-			bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
-			bullet.vec.x, bullet.vec.y = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
-			bullet.v = bullet.spd
+			if Gun.amount > 0 then
+				love.audio.rewind(Shoot)
+				love.audio.play(Shoot)
+				local bullet = actor.make(2,65,Player.x,Player.y,5,Enums.bullet)
+				bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
+				bullet.vec.x, bullet.vec.y = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
+				bullet.v = bullet.spd
+				Gun.amount = Gun.amount - 1
+			end
 		end
 	elseif State == Enums.editor then
 		local mapx,mapy = cursor.mapcoords(Cursor.x,Cursor.y)
@@ -204,6 +214,7 @@ function love.update(dt)
 	elseif State == Enums.gameplay then
 		--if math.floor(love.timer.getTime()) % 2 == 0 then --LURCHINESS!
 		if Slowdown.timer >= Slowdown.amount then --slows down time!
+			gun.update(Gun)
 			for i,v in ipairs(Actors) do actor.control(v,i) end
 			Slowdown.timer = 0
 			Timer = Timer + 1
@@ -212,14 +223,14 @@ function love.update(dt)
 		
 		if Player.v > 0 then
 			if movement.distance(Player.x,Player.y,Player.tar.x,Player.tar.y) < 10 then
-				slowdowndir = 0.1
+				slowdowndir = 0.2
 			else
-				slowdowndir = -0.1
+				slowdowndir = -0.2
 			end
 		end
 		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
 		Sound:setPitch(1/Slowdown.amount)
-		Gun:setPitch(1/Slowdown.amount)
+		Shoot:setPitch(1/Slowdown.amount)
 		Slowdown.timer = Slowdown.timer + 1
 	elseif State == Enums.editor then
 		--editor logic HEEEERE(?) maybe menu stuff or whatever

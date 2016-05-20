@@ -28,6 +28,8 @@ function update()
 	mx,my = mapcoords(Cursor.x,Cursor.y)
 	table.insert(debuglist,"Map X: "..mx)
 	table.insert(debuglist,"Map Y: "..my)
+	table.insert(debuglist,"Bullets: "..Gun.amount)
+	table.insert(debuglist,"Reload: "..Gun.reload)
 --Canvas:getWidth( )
 	return debuglist
 end
