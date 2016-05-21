@@ -78,7 +78,6 @@ function love.load()
 	Slowdown.timer=0
 	Slowdown.max=8
 	Slowdown.amount=Slowdown.max
-	Slowdown["blah"]=14
 
 	Timer=0
 
@@ -233,6 +232,7 @@ function love.update(dt)
 		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
 		Sound:setPitch(1/Slowdown.amount)
 		Shoot:setPitch(1/Slowdown.amount)
+		Reload:setPitch(1/Slowdown.max*Slowdown.amount)
 		Slowdown.timer = Slowdown.timer + 1
 	elseif State == Enums.editor then
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
@@ -242,10 +242,10 @@ end
 
 function love.draw(dt)
 --	love.graphics.setShader(Shader)
-	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
-	love.graphics.setBlendMode("replace")
 	love.graphics.setCanvas(Canvas.game) --sets drawing to the 320x240 canvas
-	love.graphics.setBackgroundColor(0,0,0,0)
+	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
+	love.graphics.setBlendMode("screen")
+--	love.graphics.setBackgroundColor(0,0,0,0)
 	if State == 1 then
 		love.graphics.print("THE WANDERERS",40,100)
 	elseif State == 2 then
