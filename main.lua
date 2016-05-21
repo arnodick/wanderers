@@ -105,6 +105,7 @@ function love.load()
 	Sound = love.audio.newSource("sounds/amb.wav")
 	Sound:setLooping(true)
 	Shoot = love.audio.newSource("sounds/gun.wav")
+	Reload = love.audio.newSource("sounds/reload.wav")
 
 	Gun = {}
 	Gun.size = 6
@@ -154,6 +155,7 @@ function love.keypressed(key,scancode,isrepeat)
 			Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
 		elseif key == 'r' then
 			Gun.reload = 60
+			love.audio.play(Reload)
 		end
 	end
 	if key == 'escape' then
