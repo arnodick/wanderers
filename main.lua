@@ -152,9 +152,9 @@ function love.keypressed(key,scancode,isrepeat)
 			love.window.setFullscreen(not love.window.getFullscreen())
 			ScreenUpdate()
 			Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
-		elseif key == 'r' then
-			Gun.reload = 60
-			love.audio.play(Reload)
+		--elseif key == 'r' then
+		--	Gun.reload = 120
+		--	love.audio.play(Reload)
 		end
 	end
 	if key == 'escape' then
@@ -185,6 +185,11 @@ function love.mousepressed(x, y, button)
 				bullet.vec.x, bullet.vec.y = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
 				bullet.v = bullet.spd
 				Gun.amount = Gun.amount - 1
+			else
+				if Gun.reload == 0 then
+					Gun.reload = 120
+					love.audio.play(Reload)
+				end
 			end
 		end
 	elseif State == Enums.editor then
@@ -232,7 +237,8 @@ function love.update(dt)
 		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
 		Sound:setPitch(1/Slowdown.amount)
 		Shoot:setPitch(1/Slowdown.amount)
-		Reload:setPitch(1/Slowdown.max*Slowdown.amount)
+		--Reload:setPitch(1/Slowdown.max*Slowdown.amount)
+		Reload:setPitch(0.8 + Slowdown.amount*0.1)
 		Slowdown.timer = Slowdown.timer + 1
 	elseif State == Enums.editor then
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
