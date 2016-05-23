@@ -5,11 +5,12 @@ for i = #files,1,-1 do --decrements bc had to delete files from a table before
 	if love.filesystem.isFile(files[i]) then --if it isn't a directory
 		local filedata = love.filesystem.newFileData("code", files[i])
 		local filename = filedata:getFilename() --get the file's name
-		if filedata:getExtension(filedata) == "lua" --if it's a lua file and isn't a reserved file
+		if filedata:getExtension() == "lua" --if it's a lua file and isn't a reserved file
 		and filename ~= "conf.lua"
 		and filename ~= "main.lua" then --it's a library, so include it
 			filename = string.gsub(filename, ".lua", "")
 			--rawset( _G, filename, require(filename) ) --TODO do we need rawset here?
+			--what is rawset all about? what is it used for?
 			_G[filename] = require(filename)
 		end
 	end
@@ -93,7 +94,6 @@ function love.load()
 	Font:setFilter("nearest","nearest",0) --clean TEXT scaling
 	love.graphics.setFont(Font)
 
-	
 	Canvas = {}
 	Canvas.game = love.graphics.newCanvas(GameWidth,GameHeight) --sets width and height of fictional retro video game (320x240)
 	Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
@@ -101,10 +101,20 @@ function love.load()
 	--game asset inits (map, entities, sfx, etc)
 	Map = maps.load("maps/saved3.txt")
 	Cursor = cursor.make(love.mouse.getPosition())
-	Sound = love.audio.newSource("sfx/amb.wav")
-	Sound:setLooping(true)
-	Shoot = love.audio.newSource("sfx/gun.wav")
-	Reload = love.audio.newSource("sfx/reload.wav")
+
+	SFX = {}
+	local files = love.filesystem.getDirectoryItems("sfx") --get all the files+directories in sfx dir
+	for i = 1,#files do
+		--TODO: for some reason this doesn't consider .wavs to be files?
+		--if love.filesystem.isFile(files[i]) then --if it isn't a directory
+		local filedata = love.filesystem.newFileData("sound", files[i])
+		local filename = filedata:getFilename() --get the sound file's name
+		local varname = string.gsub(filename, ".wav", "")
+		if filedata:getExtension() == "wav" then --if it's a .wav, add to SFX (maybe make this flexible for other sound files ie mp3)
+			SFX[varname] = love.audio.newSource("sfx/"..filename)
+		end
+		--end
+	end
 
 	Gun = {}
 	Gun.size = 6
@@ -152,9 +162,6 @@ function love.keypressed(key,scancode,isrepeat)
 			love.window.setFullscreen(not love.window.getFullscreen())
 			ScreenUpdate()
 			Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
-		--elseif key == 'r' then
-		--	Gun.reload = 120
-		--	love.audio.play(Reload)
 		end
 	end
 	if key == 'escape' then
@@ -171,15 +178,15 @@ end
 function love.mousepressed(x, y, button)
 	if State == Enums.title then
 		State = Enums.gameplay
-		Sound:play()
+		SFX.amb:play()
 	elseif State == Enums.gameplay then
 		if button == 1 then
 			Player.v = Player.spd
 			Player.tar.x,Player.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
 		elseif button == 2 then
 			if Gun.amount > 0 then
-				love.audio.rewind(Shoot)
-				love.audio.play(Shoot)
+				love.audio.rewind(SFX.shoot)
+				love.audio.play(SFX.shoot)
 				local bullet = actor.make(2,65,Player.x,Player.y,5,Enums.bullet)
 				bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
 				bullet.vec.x, bullet.vec.y = vector.normalize(vector.components(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
@@ -188,7 +195,7 @@ function love.mousepressed(x, y, button)
 			else
 				if Gun.reload == 0 then
 					Gun.reload = 120
-					love.audio.play(Reload)
+					love.audio.play(SFX.reload)
 				end
 			end
 		end
@@ -235,10 +242,9 @@ function love.update(dt)
 			end
 		end
 		Slowdown.amount = maths.clamp(Slowdown.amount + slowdowndir, 1, Slowdown.max)
-		Sound:setPitch(1/Slowdown.amount)
-		Shoot:setPitch(1/Slowdown.amount)
-		--Reload:setPitch(1/Slowdown.max*Slowdown.amount)
-		Reload:setPitch(0.8 + Slowdown.amount*0.1)
+		SFX.amb:setPitch(1/Slowdown.amount)
+		SFX.shoot:setPitch(1/Slowdown.amount)
+		SFX.reload:setPitch(0.8 + Slowdown.amount*0.1)
 		Slowdown.timer = Slowdown.timer + 1
 	elseif State == Enums.editor then
 		--editor logic HEEEERE(?) maybe menu stuff or whatever
