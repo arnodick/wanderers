@@ -98,13 +98,13 @@ function love.load()
 	Canvas.game = love.graphics.newCanvas(GameWidth,GameHeight) --sets width and height of fictional retro video game (320x240)
 	Canvas.debug = love.graphics.newCanvas(Screen.width,Screen.height) --sets width and height of debug overlay (size of window)
 
-	--game asset inits (map, entities, sounds, etc)
+	--game asset inits (map, entities, sfx, etc)
 	Map = maps.load("maps/saved3.txt")
 	Cursor = cursor.make(love.mouse.getPosition())
-	Sound = love.audio.newSource("sounds/amb.wav")
+	Sound = love.audio.newSource("sfx/amb.wav")
 	Sound:setLooping(true)
-	Shoot = love.audio.newSource("sounds/gun.wav")
-	Reload = love.audio.newSource("sounds/reload.wav")
+	Shoot = love.audio.newSource("sfx/gun.wav")
+	Reload = love.audio.newSource("sfx/reload.wav")
 
 	Gun = {}
 	Gun.size = 6
@@ -182,7 +182,7 @@ function love.mousepressed(x, y, button)
 				love.audio.play(Shoot)
 				local bullet = actor.make(2,65,Player.x,Player.y,5,Enums.bullet)
 				bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
-				bullet.vec.x, bullet.vec.y = movement.normalize(movement.vector(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
+				bullet.vec.x, bullet.vec.y = vector.normalize(vector.components(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
 				bullet.v = bullet.spd
 				Gun.amount = Gun.amount - 1
 			else
@@ -201,7 +201,7 @@ function love.mousepressed(x, y, button)
 			--TODO: make a function that iterates over a table of entities, returns if collided (also check distance BEFORE checking collision to be more efficient)
 			local col=false
 			for i,v in ipairs(Walls) do --checks if a wall is in cell, deletes it if is, makes a wall if not
-				if collidepoint(Cursor.x, Cursor.y, v) then
+				if collision.point(Cursor.x, Cursor.y, v) then
 					table.remove(Walls,i)
 					col=true
 				end
@@ -228,7 +228,7 @@ function love.update(dt)
 		local slowdowndir = 0
 		
 		if Player.v > 0 then
-			if movement.distance(Player.x,Player.y,Player.tar.x,Player.tar.y) < 10 then
+			if vector.distance(Player.x,Player.y,Player.tar.x,Player.tar.y) < 10 then
 				slowdowndir = 0.2
 			else
 				slowdowndir = -0.2

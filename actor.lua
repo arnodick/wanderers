@@ -17,21 +17,21 @@ end
 function control(a, id)
 	if a.v > 0 then
 		if a.mt == Enums.walk then
-			a.vec.x, a.vec.y = movement.normalize(movement.vector(a.x,a.y,a.tar.x,a.tar.y))
+			a.vec.x, a.vec.y = vector.normalize(vector.components(a.x,a.y,a.tar.x,a.tar.y))
 			local xdest = a.x + a.vec.x * a.v
 			local ydest = a.y + a.vec.y * a.v
-			if movement.distance(a.x,a.y,a.tar.x,a.tar.y) < a.v then
+			if vector.distance(a.x,a.y,a.tar.x,a.tar.y) < a.v then
 				--TODO: put snap to grid stuff here maybe?
 				a.v = 0
 			else
 				local colhor = false
 				local colver = false
 				for i,v in ipairs(Walls) do
-					if movement.collidepoint(xdest, ydest, v) then
-						if movement.collidepoint(xdest, a.y, v) then
+					if collision.point(xdest, ydest, v) then
+						if collision.point(xdest, a.y, v) then
 							colhor = true
 						end
-						if movement.collidepoint(a.x, ydest, v) then
+						if collision.point(a.x, ydest, v) then
 							colver = true
 						end
 					end
@@ -48,7 +48,7 @@ function control(a, id)
 			local xdest = a.x + a.vec.x * a.v
 			local ydest = a.y + a.vec.y * a.v
 			for i,v in ipairs(Walls) do
-				if movement.collidepoint(xdest, ydest, v) then
+				if collision.point(xdest, ydest, v) then
 					table.remove(Actors,id)
 				end
 			end

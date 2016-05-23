@@ -1,9 +1,9 @@
-local function vector(x,y,x2,y2)
+local function components(x,y,x2,y2)
 	return x2-x, y2-y
 end
 
 function normalize(vx,vy)
-	local l = movement.distance(0,0,vx,vy)
+	local l = distance(0,0,vx,vy)
 	return vx/l, vy/l
 end
 
@@ -14,7 +14,7 @@ end
 
 return
 {
-	vector = vector,
+	components = components,
 	normalize = normalize,
 	distance = distance,
 }
