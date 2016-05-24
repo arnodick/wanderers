@@ -9,7 +9,18 @@ function point(x, y, t)
 	return false
 end
 
+function box(a,t)
+	if  a.x < t.x + t.w
+	and a.x + a.w > t.x
+	and a.y < t.y + t.h
+	and a.y + a.h > t.y then
+		return true
+	end
+	return false
+end
+
 return
 {
 	point = point,
+	box = box,
 }

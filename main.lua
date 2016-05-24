@@ -120,7 +120,7 @@ function love.load()
 	Gun.amount = Gun.size
 	Gun.reload = 0
 
-	Player = actor.make(0,50,20,20,0.5,Enums.walk) --spawns player
+	Player = actor.make(0,50,20,20,8,8,0.5,Enums.walk) --spawns player
 end
 
 function makewall(x,y,w,h)
@@ -187,7 +187,7 @@ function love.mousepressed(x, y, button)
 			if Gun.amount > 0 then
 				love.audio.rewind(SFX.shoot)
 				love.audio.play(SFX.shoot)
-				local bullet = actor.make(2,65,Player.x,Player.y,5,Enums.bullet)
+				local bullet = actor.make(2,65,Player.x,Player.y,2,2,5,Enums.bullet)
 				bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
 				bullet.vec.x, bullet.vec.y = vector.normalize(vector.components(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
 				bullet.v = bullet.spd
@@ -272,9 +272,9 @@ function love.draw(dt)
 		cursor.draw(Cursor, true)
 		love.graphics.print("EDITOR",130,10)
 	end
-	if DebugMode then
+	if DebugMode then --this is here because it has to draw to the GAME canvas, NOT the debug canvas
 		love.graphics.setColor(0, 0, 255, 255)
-		for i,v in ipairs(Actors) do love.graphics.rectangle("line", v.x-TileW/2, v.y-TileH/2, TileW, TileH) end
+		for i,v in ipairs(Actors) do love.graphics.rectangle("line", v.x-v.w/2, v.y-v.h/2, v.w, v.h) end
 		--love.graphics.setColor(255, 0, 0, 255)
 		--for i,v in ipairs(Walls) do love.graphics.rectangle("line", v.x, v.y, v.w, v.h) end
 	end

@@ -1,9 +1,11 @@
-function make(t,s,x,y,spd,mt)
+function make(t,s,x,y,w,h,spd,mt)
 	local a={}
 	a.t=t --type (player,enemy, etc)
 	a.s=s --sprite
 	a.x=x
 	a.y=y
+	a.w=w
+	a.h=h
 	a.spd=spd
 	a.mt=mt
 	a.v=0 --velocity
@@ -28,6 +30,7 @@ function control(a, id)
 				local colver = false
 				for i,v in ipairs(Walls) do
 					if collision.point(xdest, ydest, v) then
+					--if collision.box(a,v) then
 						if collision.point(xdest, a.y, v) then
 							colhor = true
 						end
