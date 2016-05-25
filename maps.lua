@@ -19,7 +19,8 @@ function load(m)
 		for b=1, #map[a] do
 			--TODO WE CAN MAKE THIS LOAD THINGS LIKE CRAWLERS AND SPAWN POINTS WITH DIFFERENT FLAGS
 			if getflag(map[a][b], Enums.wall) then
-				makewall((b-1)*TileW, (a-1)*TileH, TileW, TileH) --each cell that has a wall flag loads a wall entity
+				--makewall((b-1)*TileW, (a-1)*TileH, TileW, TileH) --each cell that has a wall flag loads a wall entity
+				actor.make(0,0,(b-1)*TileW+TileW/2, (a-1)*TileH+TileH/2, TileW, TileH) --each cell that has a wall flag loads a wall entity
 			end
 		end
 	end

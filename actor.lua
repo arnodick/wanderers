@@ -28,14 +28,17 @@ function control(a, id)
 			else
 				local colhor = false
 				local colver = false
-				for i,v in ipairs(Walls) do
-					if collision.point(xdest, ydest, v) then
-					--if collision.box(a,v) then
-						if collision.point(xdest, a.y, v) then
-							colhor = true
-						end
-						if collision.point(a.x, ydest, v) then
-							colver = true
+				--for i,v in ipairs(Walls) do
+				for i,v in ipairs(Actors) do
+					if i ~= id then
+						if collision.point(xdest, ydest, v) then
+						--if collision.box(a,v) then
+							if collision.point(xdest, a.y, v) then
+								colhor = true
+							end
+							if collision.point(a.x, ydest, v) then
+								colver = true
+							end
 						end
 					end
 				end
@@ -50,9 +53,12 @@ function control(a, id)
 		elseif a.mt == Enums.bullet then
 			local xdest = a.x + a.vec.x * a.v
 			local ydest = a.y + a.vec.y * a.v
-			for i,v in ipairs(Walls) do
-				if collision.point(xdest, ydest, v) then
-					table.remove(Actors,id)
+			--for i,v in ipairs(Walls) do
+			for i,v in ipairs(Actors) do
+				if v ~= a.owner then
+					if collision.point(xdest, ydest, v) then
+						table.remove(Actors,id)
+					end
 				end
 			end
 			a.x = xdest

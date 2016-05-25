@@ -188,6 +188,7 @@ function love.mousepressed(x, y, button)
 				love.audio.rewind(SFX.shoot)
 				love.audio.play(SFX.shoot)
 				local bullet = actor.make(2,65,Player.x,Player.y,2,2,5,Enums.bullet)
+				bullet.owner = Player
 				bullet.tar.x, bullet.tar.y = Cursor.x + TileW/2, Cursor.y + TileH/2
 				bullet.vec.x, bullet.vec.y = vector.normalize(vector.components(bullet.x,bullet.y,bullet.tar.x,bullet.tar.y))
 				bullet.v = bullet.spd
