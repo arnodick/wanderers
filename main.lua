@@ -23,6 +23,7 @@ function ScreenUpdate()
 end
 
 function love.load()
+---[[
  	Shader = love.graphics.newShader
 	[[
 	extern number screenWidth;
@@ -38,12 +39,13 @@ function love.load()
 		//pixel.r = pixel.r + (average-pixel.r) * factor;
 		//pixel.g = pixel.g + (average-pixel.g) * factor;
 		//pixel.r = pixel.r -0.2;
-		//pixel.g = 1;
-		//pixel.b = 1;
-		//pixel.t = 1;
+		pixel.g = 1;
+		pixel.b = 0;
+		pixel.t = 1;
 		return pixel;
     }
  	]]
+--]]
 	--Shader:send("screenWidth", 1280)
 
 	--enumerators (DUHHHHHHHHHHHHH DURRRR FLUHHH BLUh)
@@ -254,7 +256,7 @@ function love.update(dt)
 end
 
 function love.draw(dt)
---	love.graphics.setShader(Shader)
+	love.graphics.setShader(Shader)
 	love.graphics.setCanvas(Canvas.game) --sets drawing to the 320x240 canvas
 	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
 	love.graphics.setBlendMode("screen")
