@@ -27,26 +27,35 @@ function love.load()
  	Shader = love.graphics.newShader
 	[[
 	extern number screenWidth;
+	extern number screenHeight;
 	vec4 effect(vec4 color,Image texture,vec2 texture_coords,vec2 screen_coords)
 	{
 		vec4 pixel = Texel(texture, texture_coords);
-		//if (texture_coords.x > 0.5)
 		number xx = floor(texture_coords.x * screenWidth * 4);
-		if (mod(xx,3) == 0)
+		number yy = floor(texture_coords.y * screenHeight *4);
+		number ym = mod(yy,3);
+		if (mod(xx + ym,3) == 0)
 		{
-			pixel.g = 0;
-			pixel.b = 0;
+			pixel.g = pixel.g/2;
+			//pixel.b = pixel.b/2;
 		}
-		if (mod(xx,3) == 1)
+		if (mod(xx + ym,3) == 1)
 		{
-			pixel.g = 0;
-			pixel.r = 0;
+			//pixel.g = pixel.g/2;
+			pixel.r = pixel.r/2;
 		}
-		if (mod(xx,3) == 2)
+		if (mod(xx + ym,3) == 2)
 		{
-			pixel.r = 0;
-			pixel.b = 0;
+			//pixel.r = pixel.r/2;
+			pixel.b = pixel.b/2;
 		}
+		if (mod(yy,2) == 0)
+		{
+			pixel.r = pixel.r - 0.5;
+			pixel.g = pixel.g - 0.5;
+			pixel.b = pixel.b - 0.5;
+		}
+		pixel.g = pixel.g + 0.15;
 		return pixel;
     }
  	]]
@@ -80,6 +89,7 @@ function love.load()
 	GameWidth=320
 	GameHeight=240
 	Shader:send("screenWidth", GameWidth)
+	Shader:send("screenHeight", GameHeight)
 	Screen={}
 	ScreenUpdate()
 
