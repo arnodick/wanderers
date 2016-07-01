@@ -18,7 +18,8 @@ end
 
 function ScreenUpdate()
 	Screen.width,Screen.height=love.graphics.getDimensions()
-	Screen.scale=Screen.height/GameHeight
+	Screen.yoff=Screen.height%GameHeight
+	Screen.scale=(Screen.height-Screen.yoff)/GameHeight
 	Screen.xoff=(Screen.width-GameWidth*Screen.scale)/2
 end
 
@@ -26,14 +27,18 @@ function love.load()
 ---[[
  	Shader = love.graphics.newShader
 	[[
-	extern number screenWidth;
+	//extern number screenWidth;
 	extern number screenHeight;
 	vec4 effect(vec4 color,Image texture,vec2 texture_coords,vec2 screen_coords)
 	{
+		vec2 neigh = texture_coords;
+		neigh.x = neigh.x + 1;
 		vec4 pixel = Texel(texture, texture_coords);
-		number xx = floor(texture_coords.x * screenWidth * 4);
+		vec4 pixel_n = Texel(texture, neigh);
+		//number xx = floor(texture_coords.x * screenWidth * 4);
 		number yy = floor(texture_coords.y * screenHeight *4);
 		number ym = mod(yy,3);
+		/*
 		if (mod(xx + ym,3) == 0)
 		{
 			pixel.g = pixel.g/2;
@@ -49,13 +54,15 @@ function love.load()
 			//pixel.r = pixel.r/2;
 			pixel.b = pixel.b/2;
 		}
+		*/
 		if (mod(yy,2) == 0)
 		{
 			pixel.r = pixel.r - 0.5;
 			pixel.g = pixel.g - 0.5;
 			pixel.b = pixel.b - 0.5;
 		}
-		pixel.g = pixel.g + 0.15;
+		pixel.b = pixel.b - 0.4;
+		pixel.r = pixel.r - 0.4;
 		return pixel;
     }
  	]]
@@ -88,7 +95,7 @@ function love.load()
 	TileH=8
 	GameWidth=320
 	GameHeight=240
-	Shader:send("screenWidth", GameWidth)
+	--Shader:send("screenWidth", GameWidth)
 	Shader:send("screenHeight", GameHeight)
 	Screen={}
 	ScreenUpdate()
@@ -302,7 +309,7 @@ function love.draw(dt)
 	love.graphics.setCanvas() --sets drawing back to screen
 
 	love.graphics.setShader(Shader)
-	love.graphics.draw(Canvas.game,0+Screen.xoff,0,0,Screen.scale,Screen.scale,0,0) --just like draws everything to the screen or whatever
+	love.graphics.draw(Canvas.game,0+Screen.xoff,0+Screen.yoff/2,0,Screen.scale,Screen.scale,0,0) --just like draws everything to the screen or whatever
 	love.graphics.setShader()
 	if DebugMode then
 		love.graphics.setCanvas(Canvas.debug) --sets drawing to the 1280 x 960 debug canvas
