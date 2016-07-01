@@ -31,7 +31,7 @@ function love.load()
 	{
 		vec4 pixel = Texel(texture, texture_coords);
 		//if (texture_coords.x > 0.5)
-		number xx = floor(texture_coords.x * screenWidth);
+		number xx = floor(texture_coords.x * screenWidth * 4);
 		if (mod(xx,3) == 0)
 		{
 			pixel.g = 0;
