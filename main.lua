@@ -36,7 +36,7 @@ function love.load()
 		vec4 pixel = Texel(texture, texture_coords);
 		vec4 pixel_n = Texel(texture, neigh);
 		//number xx = floor(texture_coords.x * screenWidth * 4);
-		number yy = floor(texture_coords.y * screenHeight *4);
+		number yy = floor(texture_coords.y * screenHeight * 4);
 		number ym = mod(yy,3);
 		/*
 		if (mod(xx + ym,3) == 0)
@@ -61,8 +61,8 @@ function love.load()
 			pixel.g = pixel.g - 0.5;
 			pixel.b = pixel.b - 0.5;
 		}
-		pixel.b = pixel.b - 0.4;
-		pixel.r = pixel.r - 0.4;
+		pixel.b = pixel.b - 0.9;
+		pixel.r = pixel.r - 0.9;
 		return pixel;
     }
  	]]
@@ -308,7 +308,9 @@ function love.draw(dt)
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
 
-	love.graphics.setShader(Shader)
+	if not DebugMode then
+		love.graphics.setShader(Shader)
+	end
 	love.graphics.draw(Canvas.game,0+Screen.xoff,0+Screen.yoff/2,0,Screen.scale,Screen.scale,0,0) --just like draws everything to the screen or whatever
 	love.graphics.setShader()
 	if DebugMode then
