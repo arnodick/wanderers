@@ -27,21 +27,26 @@ function love.load()
  	Shader = love.graphics.newShader
 	[[
 	extern number screenWidth;
-	vec4 effect (vec4 color,Image texture,vec2 texture_coords,vec2 screen_coords)
+	vec4 effect(vec4 color,Image texture,vec2 texture_coords,vec2 screen_coords)
 	{
-		//if(screen_coords.x > 640)
-		//	{return vec4(1,0,0,1);}
-		//else
-		//	{return vec4(0,0,1,1);}
-		vec4 pixel = Texel(texture, texture_coords); //current pixel colour
-		number average = (pixel.r + pixel.b + pixel.g) / 3;
-		number factor = screen_coords.x/screenWidth;
-		//pixel.r = pixel.r + (average-pixel.r) * factor;
-		//pixel.g = pixel.g + (average-pixel.g) * factor;
-		//pixel.r = pixel.r -0.2;
-		pixel.g = 1;
-		pixel.b = 0;
-		pixel.t = 1;
+		vec4 pixel = Texel(texture, texture_coords);
+		//if (texture_coords.x > 0.5)
+		number xx = floor(texture_coords.x * screenWidth);
+		if (mod(xx,3) == 0)
+		{
+			pixel.g = 0;
+			pixel.b = 0;
+		}
+		if (mod(xx,3) == 1)
+		{
+			pixel.g = 0;
+			pixel.r = 0;
+		}
+		if (mod(xx,3) == 2)
+		{
+			pixel.r = 0;
+			pixel.b = 0;
+		}
 		return pixel;
     }
  	]]
@@ -74,6 +79,7 @@ function love.load()
 	TileH=8
 	GameWidth=320
 	GameHeight=240
+	Shader:send("screenWidth", GameWidth)
 	Screen={}
 	ScreenUpdate()
 
@@ -256,7 +262,6 @@ function love.update(dt)
 end
 
 function love.draw(dt)
-	love.graphics.setShader(Shader)
 	love.graphics.setCanvas(Canvas.game) --sets drawing to the 320x240 canvas
 	love.graphics.clear() --cleans that messy ol canvas all up, makes it all fresh and new and good you know
 	love.graphics.setBlendMode("screen")
@@ -265,7 +270,9 @@ function love.draw(dt)
 		love.graphics.print("THE WANDERERS",40,100)
 	elseif State == 2 then
 		maps.draw(Map)
+--		love.graphics.setShader(Shader)
 		for i,v in ipairs(Actors) do actor.draw(v) end
+--		love.graphics.setShader()
 		cursor.draw(Cursor, false)
 	elseif State == -1 then
 		maps.draw(Map)
@@ -283,6 +290,8 @@ function love.draw(dt)
 	end
 	love.graphics.setColor(255, 255, 255, 255) --sets draw colour back to normal
 	love.graphics.setCanvas() --sets drawing back to screen
+
+	love.graphics.setShader(Shader)
 	love.graphics.draw(Canvas.game,0+Screen.xoff,0,0,Screen.scale,Screen.scale,0,0) --just like draws everything to the screen or whatever
 	love.graphics.setShader()
 	if DebugMode then
